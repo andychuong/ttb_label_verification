@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /submissions/{submissionId}/images/{imageFile} {
+
+      // Allow upload if authenticated and file is a valid image under 10MB
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+    }
+  }
+}
