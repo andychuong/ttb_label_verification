@@ -1,47 +1,48 @@
 # TTB Label Verification App - Build Task List
 
 **Generated:** February 1, 2026
+**Last Updated:** February 2, 2026
 **Source Documents:** prd.md, architecture.md, workflow-examples.md
 
 ---
 
-## Phase 0: Project Initialization
+## Phase 0: Project Initialization ✅
 
-- [ ] **0.1** Initialize Git repository
-- [ ] **0.2** Create Next.js project with App Router (`npx create-next-app@latest --typescript --tailwind --app`)
-- [ ] **0.3** Install core dependencies:
+- [x] **0.1** Initialize Git repository
+- [x] **0.2** Create Next.js project with App Router (`npx create-next-app@latest --typescript --tailwind --app`)
+- [x] **0.3** Install core dependencies:
   - `firebase` (client SDK)
   - `firebase-admin` (server SDK)
   - `react-hook-form` + `@hookform/resolvers`
   - `zod` (schema validation)
   - `openai` (GPT-4o API client)
-- [ ] **0.4** Install dev dependencies:
+- [x] **0.4** Install dev dependencies:
   - `firebase-tools` (CLI + emulators)
-- [ ] **0.5** Create `.env.local` and `.env.example` with all required env vars:
+- [x] **0.5** Create `.env.local` and `.env.example` with all required env vars:
   - `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`
   - `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`
   - `OPENAI_API_KEY`
-- [ ] **0.6** Create Firebase project in Firebase Console (or use existing)
-- [ ] **0.7** Enable Firebase Authentication (Email/Password provider)
-- [ ] **0.8** Create Firestore database
-- [ ] **0.9** Create Cloud Storage bucket
-- [ ] **0.10** Initialize Firebase in project (`firebase init` — Firestore, Storage, Functions, Emulators)
-- [ ] **0.11** Set up Firebase Emulator Suite for local dev (Firestore, Auth, Storage, Functions)
-- [ ] **0.12** Configure `firebase.json` for emulators
-- [ ] **0.13** Set up directory structure per architecture doc (see Memory Bank for full tree)
-- [ ] **0.14** Add `.gitignore` entries for `.env.local`, `node_modules`, `.firebase`, etc.
+- [x] **0.6** Create Firebase project in Firebase Console (or use existing)
+- [x] **0.7** Enable Firebase Authentication (Email/Password provider)
+- [x] **0.8** Create Firestore database
+- [x] **0.9** Create Cloud Storage bucket
+- [x] **0.10** Initialize Firebase in project (`firebase init` — Firestore, Storage, Functions, Emulators)
+- [x] **0.11** Set up Firebase Emulator Suite for local dev (Firestore, Auth, Storage, Functions)
+- [x] **0.12** Configure `firebase.json` for emulators
+- [x] **0.13** Set up directory structure per architecture doc (see Memory Bank for full tree)
+- [x] **0.14** Add `.gitignore` entries for `.env.local`, `node_modules`, `.firebase`, etc.
 
 ---
 
-## Phase 1: Firebase Configuration & Shared Utilities
+## Phase 1: Firebase Configuration & Shared Utilities ✅
 
-- [ ] **1.1** Create `src/lib/firebase/client.ts` — Firebase client SDK initialization (conditionally connect to emulators in dev)
-- [ ] **1.2** Create `src/lib/firebase/admin.ts` — Firebase Admin SDK initialization (server-side only, uses service account env vars)
-- [ ] **1.3** Create `src/lib/firebase/storage.ts` — Storage upload helper functions (upload file, get download URL, delete file)
-- [ ] **1.4** Create `src/types/user.ts` — TypeScript interfaces for User profile
-- [ ] **1.5** Create `src/types/submission.ts` — TypeScript interfaces for Submission, Image, ValidationResult, Review, History documents
-- [ ] **1.6** Create `src/types/validation.ts` — TypeScript interfaces for AI validation response (fieldResults, complianceWarnings, etc.)
-- [ ] **1.7** Create `src/lib/validation/formSchemas.ts` — Zod schemas for:
+- [x] **1.1** Create `src/lib/firebase/client.ts` — Firebase client SDK initialization (conditionally connect to emulators in dev)
+- [x] **1.2** Create `src/lib/firebase/admin.ts` — Firebase Admin SDK initialization (server-side only, uses service account env vars)
+- [x] **1.3** Create `src/lib/firebase/storage.ts` — Storage upload helper functions (upload file, get download URL, delete file)
+- [x] **1.4** Create `src/types/user.ts` — TypeScript interfaces for User profile
+- [x] **1.5** Create `src/types/submission.ts` — TypeScript interfaces for Submission, Image, ValidationResult, Review, History documents
+- [x] **1.6** Create `src/types/validation.ts` — TypeScript interfaces for AI validation response (fieldResults, complianceWarnings, etc.)
+- [x] **1.7** Create `src/lib/validation/formSchemas.ts` — Zod schemas for:
   - User profile form
   - Common submission fields
   - Distilled spirits-specific fields

@@ -1,6 +1,6 @@
 # Memory Bank: TTB Label Verification App
 
-**Last Updated:** February 1, 2026
+**Last Updated:** February 2, 2026
 **Purpose:** Quick-reference knowledge base for building the AI-Powered Alcohol Label Verification App. Contains all critical decisions, schemas, structures, and rules extracted from prd.md, architecture.md, and workflow-examples.md.
 
 ---
@@ -10,7 +10,7 @@
 - **What:** Web app that simulates TTB (Alcohol and Tobacco Tax and Trade Bureau) alcohol label approval
 - **How:** Users submit product info (mirroring TTB Form 5100.31) + label image. GPT-4o vision validates the label matches the form and meets 27 CFR regulations.
 - **Two Portals:** User Portal (producers submit labels) and Admin Portal (reviewers manage flagged submissions)
-- **No existing code** — greenfield build from documentation specs
+- **Firebase Project:** `label-validation-449b0`
 
 ---
 
@@ -497,3 +497,43 @@ Admin sets Needs Revision + feedback → user sees feedback → clicks Revise & 
 
 ### Rejection → New Submission
 Admin rejects with reason → user sees rejection → clicks Duplicate & Edit → new submission pre-filled → application type auto-set to "Resubmission" → user uploads correct label → submits as new
+
+---
+
+## 20. Build Progress
+
+### Completed Phases
+
+| Phase | Status | Date |
+|-------|--------|------|
+| **Phase 0: Project Initialization** | ✅ Complete | Feb 2, 2026 |
+| **Phase 1: Firebase Config & Shared Utilities** | ✅ Complete | Feb 2, 2026 |
+| **Phase 2: Authentication** | Not started | — |
+
+### Phase 0 Notes
+- Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
+- Zod v4.3.6 installed (uses `message` instead of `required_error` on `z.enum`)
+- Firebase emulators configured: Auth :9099, Firestore :8080, Storage :9199, Functions :5001, UI :4000
+- Firestore security rules, indexes, and Storage rules written and ready to deploy
+- Cloud Functions scaffolded in `functions/` with TypeScript
+- `.gitignore` uses `node_modules/` (not `/node_modules`) to cover both root and `functions/node_modules`
+
+### Phase 1 Notes
+- `src/lib/firebase/client.ts` — auto-connects to emulators when running on localhost in dev mode
+- `src/lib/firebase/admin.ts` — uses `FIREBASE_ADMIN_PRIVATE_KEY` env var with `\\n` → `\n` replacement for private key parsing
+- `src/lib/firebase/storage.ts` — exports `uploadImage`, `getImageUrl`, `deleteImage` helpers
+- `src/types/` — full TypeScript interfaces for `UserProfile`, `Submission`, `SubmissionImage`, `Review`, `HistoryEntry`, `ValidationResult`, `FieldResult`, `ComplianceWarning` plus all union types
+- `src/lib/validation/formSchemas.ts` — Zod schemas for user profile, image upload, and full submission form with `superRefine` for conditional validation (resubmission TTB ID, country of origin for imports)
+- All schemas use Zod v4 API (no `required_error`, use `message` instead)
+
+### Key Dependency Versions
+| Package | Version |
+|---------|---------|
+| next | 16.1.6 |
+| react | 19.x |
+| firebase | latest |
+| firebase-admin | latest |
+| zod | 4.3.6 |
+| react-hook-form | latest |
+| openai | latest |
+| typescript | 5.x |
