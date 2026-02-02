@@ -508,7 +508,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 |-------|--------|------|
 | **Phase 0: Project Initialization** | ✅ Complete | Feb 2, 2026 |
 | **Phase 1: Firebase Config & Shared Utilities** | ✅ Complete | Feb 2, 2026 |
-| **Phase 2: Authentication** | Not started | — |
+| **Phase 2: Authentication** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -525,6 +525,17 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/types/` — full TypeScript interfaces for `UserProfile`, `Submission`, `SubmissionImage`, `Review`, `HistoryEntry`, `ValidationResult`, `FieldResult`, `ComplianceWarning` plus all union types
 - `src/lib/validation/formSchemas.ts` — Zod schemas for user profile, image upload, and full submission form with `superRefine` for conditional validation (resubmission TTB ID, country of origin for imports)
 - All schemas use Zod v4 API (no `required_error`, use `message` instead)
+
+### Phase 2 Notes
+- `src/lib/auth/context.tsx` — AuthProvider uses `onAuthStateChanged` + `getIdTokenResult` for role from custom claims + Firestore `getDoc` for `profileComplete` status. Exposes `useAuth()` hook returning `{ user, role, profileComplete, loading, signOut }`
+- `src/lib/auth/guards.tsx` — Three client-side guard components: `RequireAuth` (→ /login), `RequireProfile` (→ /profile), `RequireAdmin` (→ /dashboard). Each shows a loading spinner while auth state resolves
+- `src/app/(auth)/login/page.tsx` — Email/password login with error handling for `invalid-credential` and `too-many-requests`. Links to /register and /reset-password
+- `src/app/(auth)/register/page.tsx` — Registration with email, password, confirm password. Client-side validation (password match, min 6 chars). Redirects to /profile on success
+- `src/app/(auth)/reset-password/page.tsx` — Fully functional password reset using `sendPasswordResetEmail` (not just a stub). Shows success message after sending
+- `src/app/api/_middleware/auth.ts` — Server-side auth middleware: `verifyFirebaseIdToken()` decodes Bearer token via Admin SDK, `checkAdminRole()` returns 403 for non-admins, `isAuthError()` type guard. Exports `AuthenticatedRequest` interface with `uid`, `email`, `role`, `token`
+- `scripts/set-admin.ts` — Admin seed script using `dotenv` + `firebase-admin`. Usage: `npx tsx scripts/set-admin.ts <USER_UID>`
+- `src/app/layout.tsx` — Root layout wraps children with `<AuthProvider>`. Metadata updated to "TTB Label Verification"
+- Dev dependencies added: `dotenv`, `tsx` (for running TypeScript scripts directly)
 
 ### Key Dependency Versions
 | Package | Version |

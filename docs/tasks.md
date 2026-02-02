@@ -52,21 +52,22 @@
 
 ---
 
-## Phase 2: Authentication
+## Phase 2: Authentication ✅
 
-- [ ] **2.1** Create `src/lib/auth/context.tsx` — AuthProvider wrapping `onAuthStateChanged`, exposes `user`, `role`, `loading` via `useAuth()` hook
-- [ ] **2.2** Create `src/lib/auth/guards.tsx` — Route protection:
+- [x] **2.1** Create `src/lib/auth/context.tsx` — AuthProvider wrapping `onAuthStateChanged`, exposes `user`, `role`, `loading` via `useAuth()` hook
+- [x] **2.2** Create `src/lib/auth/guards.tsx` — Route protection:
   - `RequireAuth` — redirects to `/login` if not authenticated
   - `RequireProfile` — redirects to `/profile` if `profileComplete === false`
   - `RequireAdmin` — redirects to `/dashboard` if `role !== 'admin'`
-- [ ] **2.3** Create `src/app/(auth)/login/page.tsx` — Login page with email/password form, links to register and forgot password
-- [ ] **2.4** Create `src/app/(auth)/register/page.tsx` — Registration page (email, password, confirm password), redirect to profile setup on success
-- [ ] **2.5** Create `src/app/(auth)/reset-password/page.tsx` — Password reset page (v1.1, stub for now)
-- [ ] **2.6** Create API middleware `src/app/api/_middleware/auth.ts`:
+- [x] **2.3** Create `src/app/(auth)/login/page.tsx` — Login page with email/password form, links to register and forgot password
+- [x] **2.4** Create `src/app/(auth)/register/page.tsx` — Registration page (email, password, confirm password), redirect to profile setup on success
+- [x] **2.5** Create `src/app/(auth)/reset-password/page.tsx` — Password reset page (fully functional with `sendPasswordResetEmail`)
+- [x] **2.6** Create API middleware `src/app/api/_middleware/auth.ts`:
   - `verifyFirebaseIdToken()` — decodes Bearer token using Admin SDK
-  - `attachUserRole()` — reads custom claims, attaches role to request context
   - `checkAdminRole()` — returns 403 for non-admin users on admin routes
-- [ ] **2.7** Create `scripts/set-admin.ts` — Seed script to set `role: 'admin'` custom claim on a user UID via Admin SDK
+  - `isAuthError()` — type guard for middleware error responses
+- [x] **2.7** Create `scripts/set-admin.ts` — Seed script to set `role: 'admin'` custom claim on a user UID via Admin SDK
+- [x] **2.8** Wire `AuthProvider` into root layout (`src/app/layout.tsx`)
 
 ---
 
