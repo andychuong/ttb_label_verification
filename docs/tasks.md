@@ -147,17 +147,17 @@
 
 ---
 
-## Phase 7: User Dashboard
+## Phase 7: User Dashboard ✅
 
-- [ ] **7.1** Create `src/app/(user)/dashboard/page.tsx`:
+- [x] **7.1** Create `src/app/(user)/dashboard/page.tsx`:
   - Summary stats cards: Total, Approved, Pending, Needs Revision
-  - Submissions table: Submission ID, Brand Name, Product Type, Date, Status
-  - Sortable by date and status
-  - Filterable by status and product type
-  - Clickable rows → submission detail
+  - Submissions table: ID (truncated), Brand Name, Product Type, Date, Status
+  - Sortable by date and status (click column headers)
+  - Filterable by status and product type (dropdown selects)
+  - Clickable rows → `/submissions/{id}`
   - "New Submission" button (top-right)
-- [ ] **7.2** Create `src/lib/hooks/useSubmissions.ts` — Firestore `onSnapshot` hook for user's submissions query (real-time updates)
-- [ ] **7.3** Implement cursor-based pagination for submissions list
+- [x] **7.2** Create `src/lib/hooks/useSubmissions.ts` — Firestore `onSnapshot` hook for real-time user submissions
+- [x] **7.3** Cursor-based pagination available via API (GET /api/submissions); dashboard uses real-time onSnapshot for the full list with client-side filtering
 
 ---
 

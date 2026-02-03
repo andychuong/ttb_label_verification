@@ -513,6 +513,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 4: Layout & Navigation** | ✅ Complete | Feb 2, 2026 |
 | **Phase 5: Submission Form** | ✅ Complete | Feb 2, 2026 |
 | **Phase 6: Submission API** | ✅ Complete | Feb 2, 2026 |
+| **Phase 7: User Dashboard** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -568,6 +569,11 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/app/api/submissions/[id]/resubmit/route.ts` — POST resubmit: Firestore transaction checks `status === "needs_revision"` and ownership; resets status to `pending`, clears `needsAttention`, increments version, logs history
 - All routes use standard response envelope `{ success, data, error }` and HTTP status codes per architecture doc (200, 201, 400, 401, 403, 404, 409, 423, 500)
 - Next.js 16 async params pattern used: `{ params }: { params: Promise<{ id: string }> }`
+
+### Phase 7 Notes
+- `src/lib/hooks/useSubmissions.ts` — Real-time Firestore `onSnapshot` hook. Queries `submissions` where `userId == user.uid` ordered by `createdAt` desc. Returns `{ submissions, loading, error }`. Exports `SubmissionListItem` interface
+- `src/app/(user)/dashboard/page.tsx` — Full dashboard with: (1) summary stats cards (Total, Approved, Pending, Needs Revision) computed via `useMemo`, (2) status + product type filter dropdowns, (3) submissions table with sortable Date/Status columns, truncated IDs, clickable rows → `/submissions/{id}`, (4) "New Submission" button. Uses `useSubmissions` hook for real-time data. Wrapped with `RequireProfile`
+- Dashboard uses client-side filtering/sorting on the real-time snapshot data rather than API pagination — simpler for typical user volumes; cursor pagination still available via GET `/api/submissions` for programmatic use
 
 ### Key Dependency Versions
 | Package | Version |
