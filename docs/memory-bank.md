@@ -512,6 +512,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 3: User Profile** | ✅ Complete | Feb 2, 2026 |
 | **Phase 4: Layout & Navigation** | ✅ Complete | Feb 2, 2026 |
 | **Phase 5: Submission Form** | ✅ Complete | Feb 2, 2026 |
+| **Phase 6: Submission API** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -560,6 +561,13 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/components/submission/ImageUploader.tsx` — Reusable drag-and-drop + click-to-upload component. Client-side validation (JPEG/PNG/WebP/TIFF, max 10 MB). Shows preview thumbnail with filename, size, and remove button
 - **Bug fix:** Removed `RequireProfile` from `(user)/layout.tsx` to prevent redirect loop on `/profile`. `RequireProfile` now applied per-page (dashboard, submissions) instead of at layout level
 - `src/app/(user)/dashboard/page.tsx` — Placeholder page with `RequireProfile` guard (will be replaced in Phase 7)
+
+### Phase 6 Notes
+- `src/app/api/submissions/route.ts` — GET lists user's submissions with cursor-based pagination (fetches limit+1 for `hasMore`), filterable by `status` and `productType` query params. POST validates with `submissionSchema`, normalizes nullable fields, writes to Firestore with `status: "pending"`, `version: 1`, `validationInProgress: false`
+- `src/app/api/submissions/[id]/route.ts` — GET fetches submission doc + subcollections (images, validationResults, reviews) in parallel; checks user owns it or is admin. PUT uses Firestore transaction with optimistic locking: checks `status === "pending"`, `validationInProgress === false`, version match; increments version; logs to history subcollection
+- `src/app/api/submissions/[id]/resubmit/route.ts` — POST resubmit: Firestore transaction checks `status === "needs_revision"` and ownership; resets status to `pending`, clears `needsAttention`, increments version, logs history
+- All routes use standard response envelope `{ success, data, error }` and HTTP status codes per architecture doc (200, 201, 400, 401, 403, 404, 409, 423, 500)
+- Next.js 16 async params pattern used: `{ params }: { params: Promise<{ id: string }> }`
 
 ### Key Dependency Versions
 | Package | Version |

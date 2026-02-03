@@ -134,16 +134,16 @@
 
 ---
 
-## Phase 6: Submission API Endpoints
+## Phase 6: Submission API Endpoints ✅
 
-- [ ] **6.1** Create `src/app/api/submissions/route.ts`:
-  - `GET` — List submissions for authenticated user (paginated via cursor, filterable by status & product type)
-  - `POST` — Create new submission (validate form data with Zod, write to Firestore, return submissionId)
-- [ ] **6.2** Create `src/app/api/submissions/[id]/route.ts`:
-  - `GET` — Get submission detail including validation results, images, reviews (verify user owns it or is admin)
-  - `PUT` — Edit pending submission (check `status === 'pending'`, `validationInProgress === false`, Firestore transaction with version check, increment version, log to history)
-- [ ] **6.3** Create `src/app/api/submissions/[id]/resubmit/route.ts`:
-  - `POST` — Resubmit after Needs Revision (reset status to pending, increment version, log to history, trigger new validation)
+- [x] **6.1** Create `src/app/api/submissions/route.ts`:
+  - `GET` — List submissions for authenticated user (cursor pagination, filterable by status & productType)
+  - `POST` — Create new submission (Zod validation, write to Firestore, return submissionId)
+- [x] **6.2** Create `src/app/api/submissions/[id]/route.ts`:
+  - `GET` — Get submission detail + subcollections (images, validationResults, reviews); verifies ownership or admin
+  - `PUT` — Edit pending submission (status check, validationInProgress lock, Firestore transaction with optimistic locking, version increment, history log)
+- [x] **6.3** Create `src/app/api/submissions/[id]/resubmit/route.ts`:
+  - `POST` — Resubmit after Needs Revision (reset status to pending, increment version, history log, transaction)
 
 ---
 
