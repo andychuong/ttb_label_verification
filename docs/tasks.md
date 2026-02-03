@@ -220,22 +220,22 @@
 
 ---
 
-## Phase 10: Admin Portal
+## Phase 10: Admin Portal ✅
 
-- [ ] **10.1** Create `src/app/api/admin/submissions/route.ts`:
+- [x] **10.1** Create `src/app/api/admin/submissions/route.ts`:
   - `GET` — List all submissions across all users (paginated, filterable by status, product type, date)
-- [ ] **10.2** Create `src/app/api/admin/submissions/[id]/review/route.ts`:
+- [x] **10.2** Create `src/app/api/admin/submissions/[id]/review/route.ts`:
   - `POST` — Submit admin review (action: approve/needs_revision/reject, feedbackToUser, internalNotes)
   - Firestore transaction: write review doc, update submission status, clear needsAttention flag
-- [ ] **10.3** Create `src/app/api/admin/stats/route.ts`:
+- [x] **10.3** Create `src/app/api/admin/stats/route.ts`:
   - `GET` — Dashboard summary stats (total, approved, pending, needs attention, rejected counts)
-- [ ] **10.4** Create `src/app/(admin)/dashboard/page.tsx` — Admin Dashboard:
+- [x] **10.4** Create `src/app/(admin)/admin/dashboard/page.tsx` — Admin Dashboard:
   - Summary stats cards
   - Tabbed table: "All Submissions" / "Needs Attention"
   - Columns: Submission ID, User/Company Name, Brand Name, Product Type, Date, Status
   - Sortable and filterable
   - Needs Attention tab badge with count
-- [ ] **10.5** Create `src/app/(admin)/submissions/[id]/page.tsx` — Admin Submission Detail:
+- [x] **10.5** Create `src/app/(admin)/admin/submissions/[id]/page.tsx` — Admin Submission Detail:
   - Everything from user detail view
   - Full AI Validation Report (per-field results with confidence, raw extracted text)
   - Admin action buttons: Approve, Needs Revision, Reject
@@ -243,9 +243,9 @@
   - Rejection Reason textarea (required for Reject)
   - Internal Notes textarea (admin-only, optional)
   - Confirmation modals for each action
-- [ ] **10.6** Create `src/components/admin/ReviewActionPanel.tsx` — Admin action buttons + modals
-- [ ] **10.7** Create `src/components/admin/AiReportViewer.tsx` — Full AI validation report display
-- [ ] **10.8** Create `src/lib/hooks/useAdminQueue.ts` — Firestore `onSnapshot` hook for needs-attention submissions
+- [x] **10.6** Create `src/components/admin/ReviewActionPanel.tsx` — Admin action buttons + modals
+- [x] **10.7** Create `src/components/admin/AiReportViewer.tsx` — Full AI validation report display
+- [x] **10.8** Create `src/lib/hooks/useAdminQueue.ts` — Firestore `onSnapshot` hook for needs-attention submissions
 
 ---
 

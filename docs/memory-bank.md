@@ -516,6 +516,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 7: User Dashboard** | ✅ Complete | Feb 2, 2026 |
 | **Phase 8: Submission Detail View** | ✅ Complete | Feb 2, 2026 |
 | **Phase 9: AI Validation Pipeline** | ✅ Complete | Feb 2, 2026 |
+| **Phase 10: Admin Portal** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -596,6 +597,17 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - Image polling: onCreate trigger polls up to 3 times (3s intervals) for images in subcollection since images are uploaded after document creation
 - Functions config: 512MiB memory, 300s timeout, OPENAI_API_KEY via `defineSecret` (Cloud Secret Manager in production, `.secret.local` for emulators)
 - Functions build: Node 18 target (CommonJS), compiles to `functions/lib/`. Both `tsc` build and Next.js root build pass cleanly
+
+### Phase 10 Notes
+- Admin pages use URL prefix `/admin/` via nested route: `src/app/(admin)/admin/dashboard/` and `src/app/(admin)/admin/submissions/[id]/`. The `(admin)` route group provides the admin layout wrapper while `admin/` adds the URL segment
+- `src/app/api/admin/submissions/route.ts` — GET lists all submissions across all users. Cursor-based pagination (limit+1 pattern), filterable by `status`, `productType`, `needsAttention`. Requires admin role via `checkAdminRole()`
+- `src/app/api/admin/submissions/[id]/review/route.ts` — POST submits admin review. Firestore transaction writes review doc, logs history, updates submission status, clears `needsAttention`. Validates: action must be approve/needs_revision/rejected, feedback required for needs_revision and rejected. Returns 423 if validation in progress
+- `src/app/api/admin/stats/route.ts` — GET returns dashboard summary: total, pending, approved, needsRevision, rejected, needsAttention counts. Aggregated server-side from full submissions collection
+- `src/lib/hooks/useAdminQueue.ts` — Two hooks: `useAdminSubmissions()` (all submissions ordered by createdAt desc) and `useNeedsAttentionQueue()` (where needsAttention==true ordered by createdAt asc). Both use real-time `onSnapshot`
+- `src/components/admin/ReviewActionPanel.tsx` — Three action buttons (Approve, Request Revision, Reject). Each opens confirmation modal with feedback textarea (required for revision/rejection), optional internal notes textarea. Posts to review API endpoint. Disabled during validation
+- `src/components/admin/AiReportViewer.tsx` — Full AI validation report: confidence badge, overall pass/fail, per-field analysis using FieldCheckRow, compliance warnings with severity colors, extracted label text in pre block, collapsible raw AI response (JSON debug view)
+- `src/app/(admin)/admin/dashboard/page.tsx` — Admin dashboard with 6 stats cards, tabbed interface (Needs Attention with count badge / All Submissions), status+product type filters, sortable table with ID/Brand/Type/Date/Status/Flags columns, clickable rows → admin detail
+- `src/app/(admin)/admin/submissions/[id]/page.tsx` — Admin submission detail with: ReviewActionPanel, AiReportViewer, ValidationResultsPanel, label images, full form data, review history with internal notes visible. Uses `useSubmission` hook for real-time data
 
 ### Key Dependency Versions
 | Package | Version |
