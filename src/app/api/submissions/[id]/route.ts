@@ -205,21 +205,11 @@ export async function PUT(
       // Update submission
       tx.update(docRef, {
         ...parsed.data,
-        fancifulName: parsed.data.fancifulName || null,
-        resubmissionTtbId: parsed.data.resubmissionTtbId || null,
-        formulaNumber: parsed.data.formulaNumber || null,
-        containerInfo: parsed.data.containerInfo || null,
-        applicantNotes: parsed.data.applicantNotes || null,
         countryOfOrigin: parsed.data.countryOfOrigin || null,
-        statementOfComposition: parsed.data.statementOfComposition || null,
-        ageStatement: parsed.data.ageStatement || null,
-        stateOfDistillation: parsed.data.stateOfDistillation || null,
-        commodityStatement: parsed.data.commodityStatement || null,
-        coloringMaterials: parsed.data.coloringMaterials || null,
+        fancifulName: parsed.data.fancifulName || null,
         grapeVarietals: parsed.data.grapeVarietals || null,
         appellationOfOrigin: parsed.data.appellationOfOrigin || null,
         vintageDate: parsed.data.vintageDate || null,
-        foreignWinePercentage: parsed.data.foreignWinePercentage || null,
         version: newVersion,
         updatedAt: FieldValue.serverTimestamp(),
       });

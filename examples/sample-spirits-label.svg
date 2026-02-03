@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="800" viewBox="0 0 500 800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Label background -->
+  <rect width="500" height="800" rx="6" fill="url(#bg)"/>
+
+  <!-- Gold border -->
+  <rect x="15" y="15" width="470" height="770" rx="4" fill="none" stroke="#c5a55a" stroke-width="1.5"/>
+  <rect x="22" y="22" width="456" height="756" rx="3" fill="none" stroke="#c5a55a" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+  <!-- Top ornament line -->
+  <line x1="80" y1="55" x2="420" y2="55" stroke="#c5a55a" stroke-width="0.5"/>
+
+  <!-- Brand Name -->
+  <text x="250" y="110" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="bold" fill="#c5a55a" letter-spacing="4">OAKMONT</text>
+
+  <!-- Fanciful Name -->
+  <text x="250" y="148" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#e8d5a3" letter-spacing="3">Small Batch</text>
+
+  <!-- Divider -->
+  <line x1="120" y1="170" x2="380" y2="170" stroke="#c5a55a" stroke-width="0.5"/>
+
+  <!-- Class/Type -->
+  <text x="250" y="215" text-anchor="middle" font-family="Georgia, serif" font-size="32" fill="#ffffff" letter-spacing="6">BOURBON</text>
+  <text x="250" y="245" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#e8d5a3" letter-spacing="5">WHISKEY</text>
+
+  <!-- Straight bourbon text -->
+  <text x="250" y="280" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#a89060" letter-spacing="4">STRAIGHT BOURBON WHISKEY</text>
+
+  <!-- Divider -->
+  <line x1="150" y1="305" x2="350" y2="305" stroke="#c5a55a" stroke-width="0.5"/>
+
+  <!-- Age statement -->
+  <text x="250" y="345" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#a89060" letter-spacing="2">AGED</text>
+  <text x="250" y="385" text-anchor="middle" font-family="Georgia, serif" font-size="50" fill="#c5a55a" font-weight="bold">8</text>
+  <text x="250" y="410" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#a89060" letter-spacing="2">YEARS</text>
+
+  <!-- Divider -->
+  <line x1="150" y1="435" x2="350" y2="435" stroke="#c5a55a" stroke-width="0.5"/>
+
+  <!-- Description -->
+  <text x="250" y="465" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#a89060">Crafted in small batches from select barrels,</text>
+  <text x="250" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#a89060">this bourbon delivers rich notes of caramel,</text>
+  <text x="250" y="495" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#a89060">vanilla, and toasted oak.</text>
+
+  <!-- Alcohol content -->
+  <text x="250" y="540" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#ffffff" letter-spacing="3">45% ALC/VOL</text>
+  <text x="250" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#a89060">(90 PROOF)</text>
+
+  <!-- Net contents -->
+  <text x="250" y="590" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#e8d5a3">750 mL</text>
+
+  <!-- Divider -->
+  <line x1="100" y1="610" x2="400" y2="610" stroke="#c5a55a" stroke-width="0.5"/>
+
+  <!-- Name and Address -->
+  <text x="250" y="635" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#a89060" letter-spacing="2">DISTILLED &amp; BOTTLED BY</text>
+  <text x="250" y="653" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#e8d5a3" font-weight="bold">OAKMONT DISTILLING CO.</text>
+  <text x="250" y="670" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#a89060">Bardstown, KY 40004</text>
+
+  <!-- Government Warning -->
+  <rect x="45" y="690" width="410" height="80" fill="rgba(255,255,255,0.05)" stroke="#c5a55a" stroke-width="0.3" rx="2"/>
+  <text x="250" y="706" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.5" font-weight="bold" fill="#a89060">GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL,</text>
+  <text x="250" y="717" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.5" fill="#a89060">WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY</text>
+  <text x="250" y="728" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.5" fill="#a89060">BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC</text>
+  <text x="250" y="739" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.5" fill="#a89060">BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE</text>
+  <text x="250" y="750" text-anchor="middle" font-family="Arial, sans-serif" font-size="7.5" fill="#a89060">MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.</text>
+
+  <!-- Bottom line -->
+  <line x1="80" y1="775" x2="420" y2="775" stroke="#c5a55a" stroke-width="0.5"/>
+</svg>

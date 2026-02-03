@@ -35,116 +35,80 @@ export const imageUploadSchema = z.object({
     ),
 });
 
-// --- Common Submission Fields ---
+// --- Submission Schema (TTB COLAs Online fields) ---
 
-const applicationTypeEnum = z.enum([
-  "cola",
-  "exemption",
-  "distinctive_bottle",
-  "resubmission",
-]);
-
-const commonFieldsSchema = z.object({
-  serialNumber: z.string().min(1, "Serial number is required"),
-  productType: z.enum(["wine", "distilled_spirits", "malt_beverage"], {
-    message: "Product type is required",
-  }),
-  source: z.enum(["domestic", "imported"], {
-    message: "Source is required",
-  }),
-  brandName: z.string().min(1, "Brand name is required"),
-  fancifulName: z.string().nullable().optional(),
-  alcoholContent: z
-    .string()
-    .min(1, "Alcohol content is required")
-    .refine((val) => {
-      const num = parseFloat(val.replace(/[^0-9.]/g, ""));
-      return !isNaN(num) && num >= 0 && num <= 100;
-    }, "Alcohol content must be a number between 0 and 100"),
-  netContents: z
-    .string()
-    .min(1, "Net contents is required")
-    .refine(
-      (val) => /\d/.test(val),
-      "Net contents must include a numeric value"
+export const submissionSchema = z
+  .object({
+    productType: z.enum(["wine", "distilled_spirits", "malt_beverage"], {
+      message: "Product type is required",
+    }),
+    source: z.enum(["domestic", "imported"], {
+      message: "Source is required",
+    }),
+    serialNumber: z.string().min(1, "Serial number is required"),
+    brandName: z.string().min(1, "Brand name is required"),
+    fancifulName: z.string().nullable().optional(),
+    classTypeDesignation: z
+      .string()
+      .min(1, "Class/Type designation is required"),
+    alcoholContent: z.string().refine(
+      (val) => {
+        if (!val || val.trim() === "") return true; // allow empty (conditionally required in superRefine)
+        const num = parseFloat(val.replace(/[^0-9.]/g, ""));
+        return !isNaN(num) && num >= 0 && num <= 100;
+      },
+      "Alcohol content must be a number between 0 and 100"
     ),
-  nameAddressOnLabel: z
-    .string()
-    .min(1, "Name and address on label is required"),
-  applicationType: z
-    .array(applicationTypeEnum)
-    .min(1, "At least one application type is required"),
-  resubmissionTtbId: z.string().nullable().optional(),
-  formulaNumber: z.string().nullable().optional(),
-  containerInfo: z.string().nullable().optional(),
-  healthWarningConfirmed: z.boolean().refine((val) => val === true, {
-    message: "Health warning must be confirmed",
-  }),
-  applicantNotes: z.string().nullable().optional(),
-});
-
-// --- Distilled Spirits Fields ---
-
-const distilledSpiritsFieldsSchema = z.object({
-  classTypeDesignation: z.string().min(1, "Class/Type designation is required"),
-  statementOfComposition: z.string().nullable().optional(),
-  ageStatement: z.string().nullable().optional(),
-  countryOfOrigin: z.string().nullable().optional(),
-  stateOfDistillation: z.string().nullable().optional(),
-  commodityStatement: z.string().nullable().optional(),
-  coloringMaterials: z.string().nullable().optional(),
-  fdncYellow5: z.boolean().default(false),
-  cochinealCarmine: z.boolean().default(false),
-  sulfiteDeclaration: z.boolean().default(false),
-});
-
-// --- Wine Fields ---
-
-const wineFieldsSchema = z.object({
-  classTypeDesignation: z.string().min(1, "Class/Type designation is required"),
-  grapeVarietals: z.string().nullable().optional(),
-  appellationOfOrigin: z.string().nullable().optional(),
-  vintageDate: z.string().nullable().optional(),
-  countryOfOrigin: z.string().nullable().optional(),
-  sulfiteDeclaration: z.boolean().default(true),
-  fdncYellow5: z.boolean().default(false),
-  cochinealCarmine: z.boolean().default(false),
-  foreignWinePercentage: z.string().nullable().optional(),
-});
-
-// --- Malt Beverage Fields ---
-
-const maltBeverageFieldsSchema = z.object({
-  classTypeDesignation: z.string().min(1, "Class/Type designation is required"),
-  countryOfOrigin: z.string().nullable().optional(),
-});
-
-// --- Full Submission Schema (with superRefine for conditional validation) ---
-
-export const submissionSchema = commonFieldsSchema
-  .merge(distilledSpiritsFieldsSchema)
-  .merge(wineFieldsSchema)
-  .merge(maltBeverageFieldsSchema)
+    netContents: z
+      .string()
+      .min(1, "Net contents is required")
+      .refine(
+        (val) => /\d/.test(val),
+        "Net contents must include a numeric value"
+      ),
+    nameAddressOnLabel: z
+      .string()
+      .min(1, "Name and address on label is required"),
+    countryOfOrigin: z.string().nullable().optional(),
+    // Wine-specific fields
+    grapeVarietals: z.string().nullable().optional(),
+    appellationOfOrigin: z.string().nullable().optional(),
+    vintageDate: z.string().nullable().optional(),
+    healthWarningConfirmed: z.boolean().refine((val) => val === true, {
+      message: "Health warning must be confirmed",
+    }),
+  })
   .superRefine((data, ctx) => {
-    // Require resubmission TTB ID when resubmission is selected
-    if (
-      data.applicationType.includes("resubmission") &&
-      !data.resubmissionTtbId
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Previous TTB ID is required for resubmissions",
-        path: ["resubmissionTtbId"],
-      });
-    }
-
-    // Require country of origin for imported products
+    // Country of origin required for imported products
     if (data.source === "imported" && !data.countryOfOrigin) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Country of origin is required for imported products",
         path: ["countryOfOrigin"],
       });
+    }
+    // Alcohol content required for wine and distilled spirits (optional for malt beverage per 27 CFR Part 7)
+    if (
+      data.productType !== "malt_beverage" &&
+      (!data.alcoholContent || data.alcoholContent.trim() === "")
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Alcohol content is required for wine and distilled spirits",
+        path: ["alcoholContent"],
+      });
+    }
+    // Validate vintage date format if provided
+    if (data.vintageDate && data.vintageDate.trim() !== "") {
+      const year = parseInt(data.vintageDate, 10);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(year) || year < 1700 || year > currentYear) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Vintage year must be between 1700 and ${currentYear}`,
+          path: ["vintageDate"],
+        });
+      }
     }
   });
 

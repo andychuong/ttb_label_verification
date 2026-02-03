@@ -1,12 +1,12 @@
 "use client";
 
-import { useForm, Controller, type Resolver } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   submissionSchema,
   type SubmissionFormData,
 } from "@/lib/validation/formSchemas";
-import { Input, Select, Checkbox, Textarea, Button } from "@/components/ui";
+import { Input, Select, Checkbox, Button } from "@/components/ui";
 
 const productTypeOptions = [
   { value: "distilled_spirits", label: "Distilled Spirits" },
@@ -19,67 +19,43 @@ const sourceOptions = [
   { value: "imported", label: "Imported" },
 ];
 
-const applicationTypes = [
-  { value: "cola", label: "Certificate of Label Approval (COLA)" },
-  { value: "exemption", label: "Certificate of Exemption" },
-  { value: "distinctive_bottle", label: "Distinctive Liquor Bottle Approval" },
-  { value: "resubmission", label: "Resubmission After Rejection" },
-] as const;
-
 interface StepFormProps {
   defaultValues?: SubmissionFormData;
   onNext: (data: SubmissionFormData) => void;
+  submitLabel?: string;
 }
 
-export default function StepForm({ defaultValues, onNext }: StepFormProps) {
+export default function StepForm({ defaultValues, onNext, submitLabel }: StepFormProps) {
   const {
     register,
     handleSubmit,
     watch,
-    control,
     formState: { errors },
   } = useForm<SubmissionFormData>({
     resolver: zodResolver(submissionSchema) as Resolver<SubmissionFormData>,
     defaultValues: defaultValues ?? {
-      serialNumber: "",
       productType: undefined as unknown as SubmissionFormData["productType"],
       source: undefined as unknown as SubmissionFormData["source"],
+      serialNumber: "",
       brandName: "",
       fancifulName: "",
+      classTypeDesignation: "",
       alcoholContent: "",
       netContents: "",
       nameAddressOnLabel: "",
-      applicationType: [],
-      resubmissionTtbId: "",
-      formulaNumber: "",
-      containerInfo: "",
-      healthWarningConfirmed: false,
-      applicantNotes: "",
-      classTypeDesignation: "",
-      statementOfComposition: "",
-      ageStatement: "",
       countryOfOrigin: "",
-      stateOfDistillation: "",
-      commodityStatement: "",
-      coloringMaterials: "",
-      fdncYellow5: false,
-      cochinealCarmine: false,
-      sulfiteDeclaration: false,
       grapeVarietals: "",
       appellationOfOrigin: "",
       vintageDate: "",
-      foreignWinePercentage: "",
+      healthWarningConfirmed: false,
     },
   });
 
-  const productType = watch("productType");
   const source = watch("source");
-  const applicationType = watch("applicationType");
+  const productType = watch("productType");
   const isImported = source === "imported";
-  const isSpirits = productType === "distilled_spirits";
   const isWine = productType === "wine";
-  const isMalt = productType === "malt_beverage";
-  const isResubmission = applicationType?.includes("resubmission");
+  const isMaltBeverage = productType === "malt_beverage";
 
   return (
     <form
@@ -92,12 +68,6 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
           Product Information
         </legend>
         <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <Input
-            id="serialNumber"
-            label="Serial Number *"
-            {...register("serialNumber")}
-            error={errors.serialNumber?.message}
-          />
           <Select
             id="productType"
             label="Product Type *"
@@ -115,6 +85,13 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
             error={errors.source?.message}
           />
           <Input
+            id="serialNumber"
+            label="Serial Number *"
+            {...register("serialNumber")}
+            error={errors.serialNumber?.message}
+            placeholder='e.g. "25-001"'
+          />
+          <Input
             id="brandName"
             label="Brand Name *"
             {...register("brandName")}
@@ -124,10 +101,19 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
             id="fancifulName"
             label="Fanciful Name"
             {...register("fancifulName")}
+            error={errors.fancifulName?.message}
+            placeholder="Additional product name (if any)"
+          />
+          <Input
+            id="classTypeDesignation"
+            label="Class/Type Designation *"
+            {...register("classTypeDesignation")}
+            error={errors.classTypeDesignation?.message}
+            placeholder='e.g. "Vodka", "Cabernet Sauvignon", "IPA"'
           />
           <Input
             id="alcoholContent"
-            label="Alcohol Content (%) *"
+            label={`Alcohol Content (%)${isMaltBeverage ? "" : " *"}`}
             {...register("alcoholContent")}
             error={errors.alcoholContent?.message}
             placeholder="e.g. 40"
@@ -145,90 +131,22 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
               label="Name & Address on Label *"
               {...register("nameAddressOnLabel")}
               error={errors.nameAddressOnLabel?.message}
+              placeholder="Bottler/producer name and address as shown on label"
             />
           </div>
+          {isImported && (
+            <Input
+              id="countryOfOrigin"
+              label="Country of Origin *"
+              {...register("countryOfOrigin")}
+              error={errors.countryOfOrigin?.message}
+              placeholder='e.g. "France", "Scotland"'
+            />
+          )}
         </div>
       </fieldset>
 
-      {/* --- Class/Type (shown for all product types once selected) --- */}
-      {productType && (
-        <fieldset>
-          <legend className="text-lg font-medium text-gray-900">
-            Classification
-          </legend>
-          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Input
-              id="classTypeDesignation"
-              label="Class/Type Designation *"
-              {...register("classTypeDesignation")}
-              error={errors.classTypeDesignation?.message}
-            />
-            {isImported && (
-              <Input
-                id="countryOfOrigin"
-                label="Country of Origin *"
-                {...register("countryOfOrigin")}
-                error={errors.countryOfOrigin?.message}
-              />
-            )}
-          </div>
-        </fieldset>
-      )}
-
-      {/* --- Distilled Spirits Fields --- */}
-      {isSpirits && (
-        <fieldset>
-          <legend className="text-lg font-medium text-gray-900">
-            Distilled Spirits Details
-          </legend>
-          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Textarea
-              id="statementOfComposition"
-              label="Statement of Composition"
-              {...register("statementOfComposition")}
-            />
-            <Input
-              id="ageStatement"
-              label="Age Statement"
-              {...register("ageStatement")}
-            />
-            <Input
-              id="stateOfDistillation"
-              label="State of Distillation"
-              {...register("stateOfDistillation")}
-            />
-            <Input
-              id="commodityStatement"
-              label="Commodity Statement"
-              {...register("commodityStatement")}
-            />
-            <Input
-              id="coloringMaterials"
-              label="Coloring Materials"
-              {...register("coloringMaterials")}
-            />
-          </div>
-          <div className="mt-4 space-y-3">
-            <Checkbox
-              id="fdncYellow5"
-              label="Contains FD&C Yellow #5"
-              {...register("fdncYellow5")}
-            />
-            <Checkbox
-              id="cochinealCarmine"
-              label="Contains Cochineal/Carmine"
-              {...register("cochinealCarmine")}
-            />
-            <Checkbox
-              id="sulfiteDeclaration"
-              label="Contains Sulfites"
-              {...register("sulfiteDeclaration")}
-            />
-          </div>
-        </fieldset>
-      )}
-
-      {/* --- Wine Fields --- */}
+      {/* --- Wine Details (conditional) --- */}
       {isWine && (
         <fieldset>
           <legend className="text-lg font-medium text-gray-900">
@@ -237,127 +155,28 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
           <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Input
               id="grapeVarietals"
-              label="Grape Varietal(s)"
+              label="Grape Varietals"
               {...register("grapeVarietals")}
+              error={errors.grapeVarietals?.message}
+              placeholder='e.g. "Cabernet Sauvignon"'
             />
             <Input
               id="appellationOfOrigin"
               label="Appellation of Origin"
               {...register("appellationOfOrigin")}
+              error={errors.appellationOfOrigin?.message}
+              placeholder='e.g. "Napa Valley"'
             />
             <Input
               id="vintageDate"
-              label="Vintage Date"
+              label="Vintage Year"
               {...register("vintageDate")}
-            />
-            <Input
-              id="foreignWinePercentage"
-              label="Foreign Wine Percentage"
-              {...register("foreignWinePercentage")}
-            />
-          </div>
-          <div className="mt-4 space-y-3">
-            <Checkbox
-              id="sulfiteDeclaration"
-              label="Contains Sulfites"
-              {...register("sulfiteDeclaration")}
-            />
-            <Checkbox
-              id="fdncYellow5"
-              label="Contains FD&C Yellow #5"
-              {...register("fdncYellow5")}
-            />
-            <Checkbox
-              id="cochinealCarmine"
-              label="Contains Cochineal/Carmine"
-              {...register("cochinealCarmine")}
+              error={errors.vintageDate?.message}
+              placeholder="e.g. 2021"
             />
           </div>
         </fieldset>
       )}
-
-      {/* --- Malt Beverage has no extra fields beyond class/type + country --- */}
-
-      {/* --- Application Details --- */}
-      <fieldset>
-        <legend className="text-lg font-medium text-gray-900">
-          Application Details
-        </legend>
-        <div className="mt-4 space-y-4">
-          <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">
-              Application Type *
-            </p>
-            <div className="space-y-2">
-              <Controller
-                control={control}
-                name="applicationType"
-                render={({ field }) => (
-                  <>
-                    {applicationTypes.map((at) => (
-                      <label key={at.value} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          value={at.value}
-                          checked={field.value?.includes(at.value) ?? false}
-                          onChange={(e) => {
-                            const current = field.value ?? [];
-                            if (e.target.checked) {
-                              field.onChange([...current, at.value]);
-                            } else {
-                              field.onChange(
-                                current.filter((v) => v !== at.value)
-                              );
-                            }
-                          }}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {at.label}
-                        </span>
-                      </label>
-                    ))}
-                  </>
-                )}
-              />
-            </div>
-            {errors.applicationType && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.applicationType.message}
-              </p>
-            )}
-          </div>
-
-          {isResubmission && (
-            <Input
-              id="resubmissionTtbId"
-              label="Previous TTB ID *"
-              {...register("resubmissionTtbId")}
-              error={errors.resubmissionTtbId?.message}
-            />
-          )}
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Input
-              id="formulaNumber"
-              label="Formula Number"
-              {...register("formulaNumber")}
-            />
-            <Input
-              id="containerInfo"
-              label="Container Information"
-              {...register("containerInfo")}
-            />
-          </div>
-
-          <Textarea
-            id="applicantNotes"
-            label="Applicant Notes"
-            {...register("applicantNotes")}
-            helperText="Optional notes for the reviewer"
-          />
-        </div>
-      </fieldset>
 
       {/* --- Health Warning --- */}
       <fieldset>
@@ -375,7 +194,7 @@ export default function StepForm({ defaultValues, onNext }: StepFormProps) {
       </fieldset>
 
       <div className="flex justify-end">
-        <Button type="submit">Next: Upload Label Image</Button>
+        <Button type="submit">{submitLabel ?? "Next: Upload Label Image"}</Button>
       </div>
     </form>
   );

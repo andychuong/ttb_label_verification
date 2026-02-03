@@ -1,6 +1,6 @@
 # Memory Bank: TTB Label Verification App
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 3, 2026
 **Purpose:** Quick-reference knowledge base for building the AI-Powered Alcohol Label Verification App. Contains all critical decisions, schemas, structures, and rules extracted from prd.md, architecture.md, and workflow-examples.md.
 
 ---
@@ -152,34 +152,15 @@ updatedAt: Timestamp
 
 ```
 userId: string (FK → users/{uid})
-serialNumber: string
 productType: "wine" | "distilled_spirits" | "malt_beverage"
 source: "domestic" | "imported"
 brandName: string
-fancifulName: string | null
 classTypeDesignation: string
-statementOfComposition: string | null
 alcoholContent: string
 netContents: string
 nameAddressOnLabel: string
-applicationType: string[]
-resubmissionTtbId: string | null
-formulaNumber: string | null
-containerInfo: string | null
-grapeVarietals: string | null           # wine only
-appellationOfOrigin: string | null       # wine only
-vintageDate: string | null               # wine only
-countryOfOrigin: string | null           # imported only
-ageStatement: string | null              # spirits only
-stateOfDistillation: string | null       # spirits only
-commodityStatement: string | null        # spirits only
-coloringMaterials: string | null         # spirits only
-fdncYellow5: boolean
-cochinealCarmine: boolean
-sulfiteDeclaration: boolean
+countryOfOrigin: string | null           # required if imported
 healthWarningConfirmed: boolean
-foreignWinePercentage: string | null     # wine only
-applicantNotes: string | null
 status: "pending" | "approved" | "needs_revision" | "rejected"
 needsAttention: boolean                  # flag for admin queue
 validationInProgress: boolean            # lock for race conditions
@@ -352,8 +333,9 @@ Cloud Function `onSubmissionCreated` fires on Firestore `onCreate` on `submissio
 | Health Warning | "GOVERNMENT WARNING" + key phrases present |
 | Name & Address | Label contains name+address with phrase like "Bottled By" |
 
-### Tier 2 Conditional Checks (based on product type)
-Fanciful Name, Appellation, Varietal, Vintage, Sulfites, Country of Origin, Age Statement, State of Distillation, Commodity Statement, Coloring Materials, FD&C Yellow #5, Cochineal/Carmine
+### Tier 2 Conditional Checks
+
+Country of Origin (imported products only)
 
 ### Tier 3 Compliance Warnings (informational only)
 Same field of vision, Health warning formatting, Designation consistency, Standard of fill
@@ -413,33 +395,33 @@ Security: Authenticated users can upload (image/*, <10 MB). Authenticated users 
 
 ---
 
-## 14. Form Fields by Product Type
+## 14. Submission Form Fields
 
-### Common (All Types)
-Serial Number, Type of Product, Source (Domestic/Imported), Brand Name, Fanciful Name*, Alcohol Content, Net Contents, Name & Address, Application Type, Resubmission TTB ID*, Formula Number*, Container Info*, Health Warning Confirmed
+All product types use the same flat set of 9 fields:
 
-### Distilled Spirits (Additional)
-Class/Type Designation, Statement of Composition*, Age Statement*, Country of Origin (if imported), State of Distillation*, Commodity Statement*, Coloring Materials*, FD&C Yellow #5*, Cochineal/Carmine*, Sulfite Declaration*
+| Field | Required | Notes |
+| ----- | -------- | ----- |
+| Product Type | Yes | wine / distilled_spirits / malt_beverage |
+| Source | Yes | domestic / imported |
+| Brand Name | Yes | Core TTB field |
+| Class/Type Designation | Yes | Core TTB field |
+| Alcohol Content | Yes | ABV percentage (0-100) |
+| Net Contents | Yes | e.g. "750 mL" |
+| Name & Address on Label | Yes | Bottler/producer as shown on label |
+| Country of Origin | Conditional | Required if source = imported |
+| Health Warning Confirmed | Yes | Confirms label includes government warning |
 
-### Wine (Additional)
-Class/Type Designation, Grape Varietal(s)*, Appellation of Origin*, Vintage Date*, Country of Origin (if imported), Sulfite Declaration (default checked), FD&C Yellow #5*, Cochineal/Carmine*, Foreign Wine Percentage*
-
-### Malt Beverage (Additional)
-Class/Type Designation, Country of Origin (if imported)
-
-*Fields marked with asterisk are optional or conditional*
+No product-type-specific conditional fields. The AI validation prompt handles product-type-specific compliance rules internally.
 
 ---
 
 ## 15. Validation Rules (Form)
 
-- Alcohol Content: valid number 0–100
+- Alcohol Content: valid number 0-100
 - Net Contents: numeric value + unit
-- Resubmission TTB ID: required if "Resubmission After Rejection" application type is checked
 - Country of Origin: required if Source = Imported
-- Appellation of Origin (wine): required if varietal or vintage appears on label
 - All required fields must be filled before proceeding to image upload
-- Image: JPEG, PNG, WebP, TIFF only; max 10 MB; at least one required
+- Image: JPEG, PNG, WebP, TIFF only; max 10 MB
 
 ---
 
@@ -447,8 +429,8 @@ Class/Type Designation, Country of Origin (if imported)
 
 | Version | Focus | Key Features |
 |---------|-------|-------------|
-| **v1.0** | Core MVP | Auth, profile, distilled spirits form, single image upload, GPT-4o Tier 1 checks, user+admin dashboards, basic detail view, deployment |
-| **v1.1** | Polish | Wine + malt beverage types, multi-image, edit/resubmit flows, real-time listeners, race condition handling, Tier 2 checks, pagination, forgot password |
+| **v1.0** | Core MVP | Auth, profile, simplified 9-field form, single image upload, GPT-4o Tier 1 checks, user+admin dashboards, basic detail view, deployment |
+| **v1.1** | Polish | Multi-image, edit/resubmit flows, real-time listeners, race condition handling, pagination, forgot password |
 | **v2.0** | Enhanced | Tier 3 warnings, fuzzy matching, admin notes, history timeline, search, CSV export, skeletons, toasts, responsive, auto-save drafts, zoomable images |
 | **v3.0** | Scale | Image highlighting, email notifications, batch submissions, PDF generation, automated tests, audit trail, analytics, rate limiting, multi-tenant |
 
@@ -517,6 +499,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 8: Submission Detail View** | ✅ Complete | Feb 2, 2026 |
 | **Phase 9: AI Validation Pipeline** | ✅ Complete | Feb 2, 2026 |
 | **Phase 10: Admin Portal** | ✅ Complete | Feb 2, 2026 |
+| **Phase 11: Firestore Security Rules & Indexes** | ✅ Complete | Feb 3, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -531,7 +514,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/lib/firebase/admin.ts` — uses `FIREBASE_ADMIN_PRIVATE_KEY` env var with `\\n` → `\n` replacement for private key parsing
 - `src/lib/firebase/storage.ts` — exports `uploadImage`, `getImageUrl`, `deleteImage` helpers
 - `src/types/` — full TypeScript interfaces for `UserProfile`, `Submission`, `SubmissionImage`, `Review`, `HistoryEntry`, `ValidationResult`, `FieldResult`, `ComplianceWarning` plus all union types
-- `src/lib/validation/formSchemas.ts` — Zod schemas for user profile, image upload, and full submission form with `superRefine` for conditional validation (resubmission TTB ID, country of origin for imports)
+- `src/lib/validation/formSchemas.ts` — Zod schema for 9-field submission form with superRefine for conditional country of origin validation
 - All schemas use Zod v4 API (no `required_error`, use `message` instead)
 
 ### Phase 2 Notes
@@ -559,9 +542,9 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 
 ### Phase 5 Notes
 - `src/app/(user)/submissions/new/page.tsx` — Multi-step orchestrator. Manages step state (0/1/2), stores form data + image file in state. On submit: POST to `/api/submissions` → get submissionId → upload image to Firebase Storage → navigate to detail page. Wrapped with `RequireProfile`
-- `src/app/(user)/submissions/new/step-form.tsx` — Full application form with React Hook Form + Zod `submissionSchema`. Conditional field sections based on `productType` (spirits/wine/malt) and `source` (imported shows Country of Origin). Application Type uses `Controller` for checkbox array. Resubmission TTB ID conditional on resubmission type. Required `zodResolver` type cast (`as Resolver<SubmissionFormData>`) due to Zod v4 + @hookform/resolvers type mismatch
+- `src/app/(user)/submissions/new/step-form.tsx` — Simplified 9-field form with React Hook Form + Zod `submissionSchema`. Country of Origin shown conditionally when source=imported. No product-type-specific field sections. Required `zodResolver` type cast (`as Resolver<SubmissionFormData>`) due to Zod v4 + @hookform/resolvers type mismatch
 - `src/app/(user)/submissions/new/step-upload.tsx` — Single image upload step using `ImageUploader` component. Validates file is selected before allowing next
-- `src/app/(user)/submissions/new/step-review.tsx` — Read-only two-column summary of all form data with product-type-specific sections. Shows image preview thumbnail. Confirm & Submit button
+- `src/app/(user)/submissions/new/step-review.tsx` — Read-only two-column summary of all 9 form fields. Shows image preview thumbnail. Confirm & Submit button
 - `src/components/submission/ImageUploader.tsx` — Reusable drag-and-drop + click-to-upload component. Client-side validation (JPEG/PNG/WebP/TIFF, max 10 MB). Shows preview thumbnail with filename, size, and remove button
 - **Bug fix:** Removed `RequireProfile` from `(user)/layout.tsx` to prevent redirect loop on `/profile`. `RequireProfile` now applied per-page (dashboard, submissions) instead of at layout level
 - `src/app/(user)/dashboard/page.tsx` — Placeholder page with `RequireProfile` guard (will be replaced in Phase 7)
@@ -608,6 +591,23 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/components/admin/AiReportViewer.tsx` — Full AI validation report: confidence badge, overall pass/fail, per-field analysis using FieldCheckRow, compliance warnings with severity colors, extracted label text in pre block, collapsible raw AI response (JSON debug view)
 - `src/app/(admin)/admin/dashboard/page.tsx` — Admin dashboard with 6 stats cards, tabbed interface (Needs Attention with count badge / All Submissions), status+product type filters, sortable table with ID/Brand/Type/Date/Status/Flags columns, clickable rows → admin detail
 - `src/app/(admin)/admin/submissions/[id]/page.tsx` — Admin submission detail with: ReviewActionPanel, AiReportViewer, ValidationResultsPanel, label images, full form data, review history with internal notes visible. Uses `useSubmission` hook for real-time data
+
+### Field Simplification (Feb 3, 2026)
+
+- Reduced submission form from ~29 fields to 9 fields: productType, source, brandName, classTypeDesignation, alcoholContent, netContents, nameAddressOnLabel, countryOfOrigin (conditional), healthWarningConfirmed
+- Removed all product-type-specific conditional fields (grapeVarietals, appellationOfOrigin, vintageDate, ageStatement, stateOfDistillation, commodityStatement, coloringMaterials, etc.)
+- Removed serialNumber, fancifulName, applicationType, resubmissionTtbId, formulaNumber, containerInfo, statementOfComposition, fdncYellow5, cochinealCarmine, sulfiteDeclaration, foreignWinePercentage, applicantNotes
+- All product types (wine, distilled_spirits, malt_beverage) now use the same flat field set
+- AI validation prompt handles product-type-specific compliance rules internally
+- Updated Firestore schema, Zod validation schema, form components, and review page accordingly
+
+### Phase 11 Notes
+
+- `firestore.rules` — Written during Phase 0, verified and deployed. Users can read/write own profile; admins read all. Submissions: users read own, admins read all; users create with own userId; users update only if pending & not validating; admins update all. Subcollections inherit parent access via `get()` lookups on parent submission
+- `firestore.indexes.json` — 5 composite indexes deployed: userId+createdAt, userId+status+createdAt, status+createdAt, productType+createdAt, needsAttention+createdAt
+- `storage.rules` — Authenticated users can upload images (image/*, <10 MB) and read images
+- `.firebaserc` — Created with default project `label-validation-449b0`
+- All rules compiled and deployed successfully via `firebase deploy --only firestore:rules,firestore:indexes,storage`
 
 ### Key Dependency Versions
 | Package | Version |

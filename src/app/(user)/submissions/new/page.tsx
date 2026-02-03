@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { RequireProfile } from "@/lib/auth/guards";
 import { useAuth } from "@/lib/auth/context";
+import { db } from "@/lib/firebase/client";
 import { uploadImage } from "@/lib/firebase/storage";
 import type { SubmissionFormData } from "@/lib/validation/formSchemas";
 import StepForm from "./step-form";
@@ -60,9 +62,24 @@ export default function NewSubmissionPage() {
 
       // 2. Upload image to Firebase Storage
       const imageId = crypto.randomUUID();
-      await uploadImage(submissionId, imageId, imageFile);
+      const { storagePath, downloadUrl } = await uploadImage(
+        submissionId,
+        imageId,
+        imageFile
+      );
 
-      // 3. Navigate to the submission detail page
+      // 3. Create image document in Firestore so the Cloud Function can find it
+      await setDoc(doc(db, "submissions", submissionId, "images", imageId), {
+        imageType: "brand_front",
+        storagePath,
+        downloadUrl,
+        originalFilename: imageFile.name,
+        mimeType: imageFile.type,
+        fileSize: imageFile.size,
+        createdAt: serverTimestamp(),
+      });
+
+      // 4. Navigate to the submission detail page
       router.push(`/submissions/${submissionId}`);
     } catch {
       setError("Failed to submit. Please try again.");

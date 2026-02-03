@@ -1,0 +1,59 @@
+{
+  "wine": {
+    "description": "Matches sample-wine-label.png",
+    "formData": {
+      "productType": "wine",
+      "source": "domestic",
+      "serialNumber": "26-001",
+      "brandName": "Golden Ridge",
+      "fancifulName": "Reserve Selection",
+      "classTypeDesignation": "Cabernet Sauvignon",
+      "alcoholContent": "14.5",
+      "netContents": "750 mL",
+      "nameAddressOnLabel": "Golden Ridge Estate Winery, 1250 Silverado Trail, Napa, CA 94558",
+      "countryOfOrigin": null,
+      "grapeVarietals": "Cabernet Sauvignon",
+      "appellationOfOrigin": "Napa Valley",
+      "vintageDate": "2021",
+      "healthWarningConfirmed": true
+    }
+  },
+  "distilled_spirits": {
+    "description": "Matches sample-spirits-label.png",
+    "formData": {
+      "productType": "distilled_spirits",
+      "source": "domestic",
+      "serialNumber": "26-002",
+      "brandName": "Oakmont",
+      "fancifulName": "Small Batch",
+      "classTypeDesignation": "Straight Bourbon Whiskey",
+      "alcoholContent": "45",
+      "netContents": "750 mL",
+      "nameAddressOnLabel": "Oakmont Distilling Co., Bardstown, KY 40004",
+      "countryOfOrigin": null,
+      "grapeVarietals": null,
+      "appellationOfOrigin": null,
+      "vintageDate": null,
+      "healthWarningConfirmed": true
+    }
+  },
+  "malt_beverage": {
+    "description": "Matches sample-malt-label.png",
+    "formData": {
+      "productType": "malt_beverage",
+      "source": "domestic",
+      "serialNumber": "26-003",
+      "brandName": "Summit Brewing",
+      "fancifulName": null,
+      "classTypeDesignation": "India Pale Ale",
+      "alcoholContent": "6.8",
+      "netContents": "12 FL OZ",
+      "nameAddressOnLabel": "Summit Brewing Company, Portland, OR 97209",
+      "countryOfOrigin": null,
+      "grapeVarietals": null,
+      "appellationOfOrigin": null,
+      "vintageDate": null,
+      "healthWarningConfirmed": true
+    }
+  }
+}

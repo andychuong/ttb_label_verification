@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="550" viewBox="0 0 400 550">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7f3e9"/>
+      <stop offset="50%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f7f3e9"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4a017"/>
+      <stop offset="100%" style="stop-color:#c4920a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Label background -->
+  <rect width="400" height="550" rx="8" fill="url(#bg)" stroke="#d4a017" stroke-width="2"/>
+
+  <!-- Top banner -->
+  <rect x="0" y="0" width="400" height="70" rx="8" fill="#1b4332"/>
+  <rect x="0" y="40" width="400" height="30" fill="#1b4332"/>
+  <text x="200" y="48" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#d4a017" letter-spacing="5" font-weight="bold">CRAFT BREWED</text>
+
+  <!-- Brand Name -->
+  <text x="200" y="125" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="44" font-weight="900" fill="#1b4332" letter-spacing="2">SUMMIT</text>
+  <text x="200" y="155" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="22" font-weight="900" fill="#1b4332" letter-spacing="6">BREWING</text>
+
+  <!-- Divider -->
+  <line x1="60" y1="175" x2="340" y2="175" stroke="#d4a017" stroke-width="2"/>
+
+  <!-- Class/Type -->
+  <text x="200" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1b4332" letter-spacing="3">INDIA PALE ALE</text>
+
+  <!-- Description -->
+  <text x="200" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#5a6e5a">A bold, hop-forward IPA with tropical citrus notes,</text>
+  <text x="200" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#5a6e5a">pine resin aroma, and a clean bitter finish.</text>
+
+  <!-- Divider -->
+  <line x1="100" y1="285" x2="300" y2="285" stroke="#d4a017" stroke-width="1"/>
+
+  <!-- ABV and size - side by side -->
+  <text x="140" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1b4332">6.8% ABV</text>
+  <text x="200" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#d4a017">|</text>
+  <text x="260" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1b4332">12 FL OZ</text>
+
+  <!-- IBU -->
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#5a6e5a" letter-spacing="2">65 IBU</text>
+
+  <!-- Divider -->
+  <line x1="60" y1="370" x2="340" y2="370" stroke="#d4a017" stroke-width="1"/>
+
+  <!-- Name and Address -->
+  <text x="200" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#5a6e5a" letter-spacing="2">BREWED BY</text>
+  <text x="200" y="412" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b4332" font-weight="bold">SUMMIT BREWING COMPANY</text>
+  <text x="200" y="428" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#5a6e5a">Portland, OR 97209</text>
+
+  <!-- Government Warning -->
+  <rect x="30" y="445" width="340" height="75" fill="#f7f3e9" stroke="#c9b99a" stroke-width="0.5" rx="2"/>
+  <text x="200" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#333">GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL,</text>
+  <text x="200" y="471" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#333">WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING PREGNANCY</text>
+  <text x="200" y="482" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#333">BECAUSE OF THE RISK OF BIRTH DEFECTS. (2) CONSUMPTION OF ALCOHOLIC</text>
+  <text x="200" y="493" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#333">BEVERAGES IMPAIRS YOUR ABILITY TO DRIVE A CAR OR OPERATE</text>
+  <text x="200" y="504" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#333">MACHINERY, AND MAY CAUSE HEALTH PROBLEMS.</text>
+
+  <!-- Bottom banner -->
+  <rect x="0" y="525" width="400" height="25" rx="0" fill="#1b4332"/>
+  <rect x="0" y="525" width="400" height="5" fill="#1b4332"/>
+  <text x="200" y="543" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#d4a017" letter-spacing="3">PORTLAND, OREGON</text>
+</svg>

@@ -1,8 +1,8 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { RequireAuth } from "@/lib/auth/guards";
 import { useAuth } from "@/lib/auth/context";
 
@@ -94,17 +94,42 @@ function Header() {
   );
 }
 
+function RedirectIfAdmin({ children }: { children: ReactNode }) {
+  const { role, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && role === "admin") {
+      router.replace("/admin/dashboard");
+    }
+  }, [role, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
+      </div>
+    );
+  }
+
+  if (role === "admin") return null;
+
+  return <>{children}</>;
+}
+
 export default function UserLayout({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex flex-1 flex-col">
-          <Header />
-          <MobileNav />
-          <main className="flex-1 p-6">{children}</main>
+      <RedirectIfAdmin>
+        <div className="flex min-h-screen bg-gray-50">
+          <Sidebar />
+          <div className="flex flex-1 flex-col">
+            <Header />
+            <MobileNav />
+            <main className="flex-1 p-6">{children}</main>
+          </div>
         </div>
-      </div>
+      </RedirectIfAdmin>
     </RequireAuth>
   );
 }

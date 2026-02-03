@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files
 .env*.local
+*.secret.local
 
 # keep .env.example tracked
 !.env.example

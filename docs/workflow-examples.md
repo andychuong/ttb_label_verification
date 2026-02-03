@@ -65,16 +65,14 @@
 | Step | User Action | System Response |
 |------|-------------|-----------------|
 | 1 | From her dashboard, Maria clicks **"New Submission."** | The app navigates to **Step 1: Application Form**. The Type of Product dropdown is focused. |
-| 2 | She selects **"Distilled Spirits"** from the Type of Product dropdown. | The form dynamically reveals distilled spirits–specific fields (Class/Type Designation, Age Statement, State of Distillation, etc.) alongside the common fields. |
+| 2 | She selects **"Distilled Spirits"** from the Type of Product dropdown. | The form shows all fields for the submission (same fields for all product types). |
 | 3 | She fills in the form: | Inline validation confirms each field as she moves through. The Alcohol Content field strips the `%` sign and validates it as a number between 0–100. |
-| | — Serial Number: `25S001` | |
 | | — Source of Product: `Domestic` | |
 | | — Brand Name: `Old Tom Distillery` | |
 | | — Class/Type Designation: `Kentucky Straight Bourbon Whiskey` | |
 | | — Alcohol Content: `45` | |
 | | — Net Contents: `750 mL` | |
 | | — Name and Address: `Bottled By Old Tom Distillery, Louisville, KY 40202` | |
-| | — Type of Application: ☑ Certificate of Label Approval | |
 | | — Health Warning Included: ☑ (checked by default) | |
 | 4 | She clicks **"Next: Upload Label."** | Form validation passes. The app navigates to **Step 2: Image Upload**. |
 | 5 | She drags a high-resolution JPEG of the bourbon label into the upload zone. | The image uploads to Firebase Storage. A thumbnail preview appears showing the label with "OLD TOM DISTILLERY" clearly visible, along with "Kentucky Straight Bourbon Whiskey," "45% Alc./Vol. (90 Proof)," "750 mL," the bottler's address, and the government warning statement. File size and format are displayed: `bourbon_label_front.jpg — 2.3 MB — JPEG`. |
@@ -112,7 +110,8 @@
 | | — Class/Type: `Vodka` | |
 | | — Alcohol Content: `40` | |
 | | — Net Contents: `750 mL` | |
-| | — (remaining required fields filled in) | |
+| | — Name and Address: `Sunset Spirits LLC, Napa, CA 94559` | |
+| | — Health Warning: ☑ | |
 | 2 | She uploads a label image that actually reads "Sunset Premium Vodka" and shows "42% Alc./Vol." | Preview displays. Maria doesn't notice the discrepancies. |
 | 3 | She reviews and submits. | Submission created as `SUB-0002 | ⏳ Pending`. |
 | 4 | — (backend validation runs) | GPT-4o detects two mismatches: brand name ("Sunset Premium Vodka" ≠ "Sunset Reserve Vodka") and alcohol content (42% ≠ 40%). The `overallPass` is `false`. The Cloud Function sets `needsAttention: true` and leaves `status: "pending"`. |
@@ -134,7 +133,7 @@
 ### 1.4 Editing a Pending Submission
 
 **Actor:** Maria Lopez
-**Scenario:** Immediately after submitting, Maria realizes she entered the wrong serial number. She edits before validation starts.
+**Scenario:** Immediately after submitting, Maria realizes she entered the wrong brand name. She edits before validation starts.
 
 **Steps:**
 
@@ -142,7 +141,7 @@
 |------|-------------|-----------------|
 | 1 | Maria clicks into `SUB-0003` from her dashboard (status: `⏳ Pending`). | The detail view loads. Since `validationInProgress` is `false`, the **"Edit Submission"** button is enabled. |
 | 2 | She clicks **"Edit Submission."** | The app opens the form in edit mode, pre-filled with all existing data. A notice reads: *"You are editing a pending submission. Saving will reset the validation queue."* |
-| 3 | She changes Serial Number from `25S003` to `25S004` and clicks **"Save Changes."** | A Firestore transaction runs: it checks that `validationInProgress` is still `false`, increments `version`, updates the serial number, and writes the change to the `history` subcollection. If the validation Cloud Function was queued, it will see the version mismatch and abort on its next check. A new validation cycle is triggered. |
+| 3 | She changes Brand Name from `Old Tom` to `Old Tom Reserve` and clicks **"Save Changes."** | A Firestore transaction runs: it checks that `validationInProgress` is still `false`, increments `version`, updates the brand name, and writes the change to the `history` subcollection. If the validation Cloud Function was queued, it will see the version mismatch and abort on its next check. A new validation cycle is triggered. |
 | 4 | She's returned to the detail view. | A toast reads: *"Submission updated. Validation has been restarted."* The status remains `⏳ Pending`. |
 
 **Result:** The submission is updated and re-queued for validation with the corrected data.
@@ -204,7 +203,7 @@
 |------|-------------|-----------------|
 | 1 | Maria clicks into `SUB-0005` on her dashboard. | The detail view loads. A red banner shows: *"This submission was rejected. Reason: 'The uploaded label image is for a different product (wine label uploaded for a spirits submission). Please submit a new application with the correct label.'"* |
 | | | The **"Edit Submission"** button is not available (rejected submissions cannot be edited). |
-| 2 | Maria clicks **"Duplicate & Edit."** | A new submission form opens, pre-filled with all the data from `SUB-0005`. The Type of Application section auto-checks **"Resubmission After Rejection"** and pre-fills the Previous TTB ID field with `SUB-0005`. |
+| 2 | Maria clicks **"Duplicate & Edit."** | A new submission form opens, pre-filled with all the data from the rejected submission. |
 | 3 | She keeps the form data the same but uploads the correct label image this time. | The new image preview shows the correct spirits label. |
 | 4 | She reviews and submits. | A new submission `SUB-0006` is created with `status: "pending"`. The form includes a reference to the original rejected submission. |
 
@@ -226,52 +225,49 @@
 | | — Source of Product: `Imported` | The **Country of Origin** field appears as a required field. |
 | 2 | He fills in the form: | |
 | | — Brand Name: `Grey Goose` | |
-| | — Fanciful Name: `Berry Rouge` | |
 | | — Class/Type: `Vodka - Other Flavored` | |
 | | — Alcohol Content: `40` | |
 | | — Net Contents: `750 mL` | |
 | | — Country of Origin: `France` | |
 | | — Name and Address: `Imported By Grey Goose Importing Company, Coral Gables, FL 33134` | |
-| | — Formula Number: `1656333` | |
-| | — Type of Application: ☑ Certificate of Label Approval | |
 | 3 | He uploads front and back label images. | Two image previews appear, each tagged as "Brand (front)" and "Back." |
 | 4 | He reviews and submits. | Submission created. Validation begins. |
-| 5 | — (validation runs) | GPT-4o checks all standard fields PLUS the conditional checks for imported products: Country of Origin statement on label (checks for "Product of France" or equivalent), and the fanciful name "Berry Rouge." All pass. |
+| 5 | — (validation runs) | GPT-4o checks all standard fields plus the Country of Origin statement on the label (checks for "Product of France" or equivalent). All pass. |
 | 6 | Dashboard updates. | `SUB-0010 | Grey Goose | Distilled Spirits | Feb 1, 2026 | ✅ Approved` |
 
-**Result:** The imported product submission includes country of origin and fanciful name verification, both handled automatically.
+**Result:** The imported product submission includes country of origin verification, handled automatically.
 
 ---
 
 ### 1.9 Submitting a Wine Label
 
 **Actor:** Elena Ruiz, winemaker at Valle Verde Winery
-**Scenario:** Elena submits a domestic Chardonnay label with varietal, appellation, and vintage information.
+**Scenario:** Elena submits a domestic Chardonnay label using the standard submission form.
 
 **Steps:**
 
 | Step | User Action | System Response |
 |------|-------------|-----------------|
-| 1 | Elena selects **"Wine"** as the product type. | Wine-specific fields appear: Grape Varietal(s), Appellation of Origin, Vintage Date, Sulfite Declaration (checked by default). |
+| 1 | Elena selects **"Wine"** as the product type. | The form shows all fields for the submission (same fields for all product types). |
 | 2 | She fills in the form: | |
+| | — Source: `Domestic` | |
 | | — Brand Name: `Valle Verde` | |
-| | — Class/Type: `Chardonnay` (varietal as designation) | |
-| | — Grape Varietal(s): `Chardonnay` | |
-| | — Appellation of Origin: `Napa Valley` | Since a grape varietal is specified, the system shows a helper note: *"Appellation of Origin is required when a varietal designation appears on the label."* |
-| | — Vintage Date: `2023` | |
+| | — Class/Type Designation: `Chardonnay` | |
 | | — Alcohol Content: `13.5` | |
 | | — Net Contents: `750 mL` | |
-| | — Sulfite Declaration: ☑ (default) | |
 | | — Name and Address: `Produced & Bottled By Valle Verde Winery, Napa, CA 94558` | |
+| | — Health Warning: ☑ | |
 | 3 | She uploads the label and submits. | Submission created as pending. |
-| 4 | — (validation runs) | GPT-4o performs all standard checks plus wine-specific conditional checks: |
-| | | — Grape Varietal: ✅ "Chardonnay" found on label |
-| | | — Appellation: ✅ "Napa Valley" found on label alongside the varietal |
-| | | — Vintage Date: ✅ "2023" found on label |
-| | | — Sulfite Declaration: ✅ "Contains Sulfites" found on label |
-| | | All checks pass → auto-approved. |
+| 4 | — (validation runs) | GPT-4o performs all standard Tier 1 checks: |
+| | | ✅ Brand Name — Match ("Valle Verde" found on label) |
+| | | ✅ Class/Type — Match ("Chardonnay" found) |
+| | | ✅ Alcohol Content — Match (13.5% extracted, matches form) |
+| | | ✅ Net Contents — Match ("750 mL" found) |
+| | | ✅ Health Warning — Present |
+| | | ✅ Name & Address — Match |
+| | | All checks pass -- auto-approved. |
 
-**Result:** Wine-specific conditional fields are validated correctly, including varietal, appellation, vintage, and sulfite declaration.
+**Result:** The wine label is validated using the standard field checks and auto-approved.
 
 ---
 
@@ -494,8 +490,8 @@
 | User tries to edit during validation | 1.5 | Edit blocked with clear message |
 | Admin sends back for revision | 1.6, 2.2 | User sees feedback, revises, resubmits |
 | Submission rejected outright | 1.7, 2.3 | User uses "Duplicate & Edit" for new submission |
-| Imported product with extra fields | 1.8 | Country of origin and fanciful name validated |
-| Wine with varietal/appellation/vintage | 1.9 | Wine-specific conditional checks run |
+| Imported product with country of origin | 1.8 | Country of origin validated on label |
+| Wine product type | 1.9 | Standard field checks run for wine submission |
 | Blurry or unreadable image | 1.10, 2.4 | Low confidence flagged; user prompted for better image |
 | Resubmission with revision history | 2.6 | Admin sees version trail and previous feedback |
 | Wrong product image uploaded entirely | 2.3 | Rejected with guidance to create new submission |

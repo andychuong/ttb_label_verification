@@ -1,7 +1,7 @@
 # Product Requirements Document: AI-Powered Alcohol Label Verification App
 
-**Version:** 1.0
-**Date:** February 1, 2026
+**Version:** 2.0
+**Date:** February 3, 2026
 **Status:** Draft
 
 ---
@@ -82,66 +82,19 @@ The new submission is a multi-step form with two stages.
 
 #### Step 1: Application Form Data
 
-The form mirrors a simplified version of TTB Form 5100.31 with fields organized by section. The required fields vary based on the selected **Type of Product** (Item 5). All three product categories (Wine, Distilled Spirits, Malt Beverage) share some common fields but have category-specific fields as well.
+The form captures 9 core fields for TTB label verification. The form is flat with no product-type-specific sections -- all product types use the same fields.
 
-##### Common Fields (All Product Types)
-
-| Field | Type | Required | TTB Form Mapping | Notes |
-|-------|------|----------|-----------------|-------|
-| Serial Number | Text | Yes | Item 4 | Applicant's serial number for the submission |
-| Type of Product | Dropdown | Yes | Item 5 | Options: Wine, Distilled Spirits, Malt Beverage. Determines conditional fields. |
-| Source of Product | Radio | Yes | Item 3 | Domestic or Imported |
-| Brand Name | Text | Yes | Item 6 | The name under which the product is sold (e.g., "GREY GOOSE") |
-| Fanciful Name | Text | No | Item 7 | Optional additional name (e.g., "BERRY ROUGE") |
-| Alcohol Content | Text | Yes | Label requirement per 27 CFR 4.36, 5.65, 7.71 | ABV percentage as shown on label. Accept formats like "40%", "40", "40% Alc./Vol." |
-| Net Contents | Text | Yes | Label requirement per 27 CFR 4.37, 5.70, 7.70 | Volume (e.g., "750 mL", "12 fl oz", "1 L"). Must be a standard of fill. |
-| Name and Address on Label | Text | Yes | 27 CFR 4.35, 5.66-5.68, 7.66-7.68 | The bottler/importer name and address as it appears on the label |
-| Type of Application | Checkbox group | Yes | Item 14 | Certificate of Label Approval / Certificate of Exemption / Distinctive Liquor Bottle / Resubmission After Rejection |
-| If Resubmission | Text | Conditional | Item 14d | Previous TTB ID number (shown only if "Resubmission" is checked) |
-| Formula Number | Text | No | Item 9 | If the product requires a formula |
-| Container Info (blown/branded/embossed) | Textarea | No | Item 15 | Any information on the container not appearing on affixed labels |
-
-##### Distilled Spirits–Specific Fields
-
-| Field | Type | Required | Regulatory Basis | Notes |
-|-------|------|----------|-----------------|-------|
-| Class/Type Designation | Text | Yes | 27 CFR 5.165, 5.141 | e.g., "Vodka," "Kentucky Straight Bourbon Whiskey," "Chocolate Flavored Brandy" |
-| Statement of Composition | Text | Conditional | 27 CFR 5.141 | Required if using a fanciful name instead of a standard class/type |
-| Age Statement | Text | No | 27 CFR 5.74 | Required for: whisky aged < 4 years, brandy aged < 2 years, products with distillation date or age references |
-| Country of Origin | Text | Conditional | 19 CFR 134.11, 27 CFR 5.69 | Required if Source = Imported |
-| State of Distillation | Text | Conditional | 27 CFR 5.66(f) | Required for certain whisky types if distilled outside the state in the label address |
-| Commodity Statement | Text | No | 27 CFR 5.71 | e.g., "Distilled from Grain" — required for neutral spirits, gin, or blends with neutral spirits |
-| Presence of Coloring Materials | Text | No | 27 CFR 5.63(c)(6) | e.g., "Colored with Caramel" — required if coloring materials were used |
-| FD&C Yellow #5 Declaration | Checkbox | No | 27 CFR 5.63(c)(5) | Must be disclosed on label if used |
-| Cochineal/Carmine Declaration | Checkbox | No | 27 CFR 5.63(c)(6) | Must be disclosed on label if used |
-| Sulfite Declaration | Checkbox | No | 27 CFR 5.63(c)(7) | Required if ≥ 10 ppm sulfur dioxide |
-
-##### Wine-Specific Fields
-
-| Field | Type | Required | Regulatory Basis | Notes |
-|-------|------|----------|-----------------|-------|
-| Class/Type Designation | Text | Yes | 27 CFR 4.21, 4.34 | e.g., "Red Wine," "Sparkling Wine," "Chardonnay" |
-| Grape Varietal(s) | Text | Conditional | Item 10, 27 CFR 4.91 | Required if varietal appears on label |
-| Appellation of Origin | Text | Conditional | Item 11, 27 CFR 4.25 | Required if label shows varietal, vintage date, or semi-generic type |
-| Vintage Date | Text | No | 27 CFR 4.27 | Year of harvest if shown on label |
-| Country of Origin | Text | Conditional | 19 CFR 134.11 | Required if Source = Imported |
-| Sulfite Declaration | Checkbox | Yes (default checked) | 27 CFR 4.32(e) | Required if ≥ 10 ppm sulfur dioxide. Most wines require this. |
-| FD&C Yellow #5 Declaration | Checkbox | No | 27 CFR 4.32(c) | Must be disclosed on label if used |
-| Cochineal/Carmine Declaration | Checkbox | No | 27 CFR 4.32(d) | Must be disclosed on label if used |
-| Percentage of Foreign Wine | Text | Conditional | 27 CFR 4.32(a)(4) | Required for blends of American and foreign wine if label references foreign wine |
-
-##### Malt Beverage–Specific Fields
-
-| Field | Type | Required | Regulatory Basis | Notes |
-|-------|------|----------|-----------------|-------|
-| Class/Type Designation | Text | Yes | 27 CFR 7.63 | e.g., "Ale," "Lager," "IPA," "Stout" |
-| Country of Origin | Text | Conditional | 19 CFR 134.11 | Required if Source = Imported |
-
-##### Health Warning Statement (All Product Types)
-
-| Field | Type | Required | Regulatory Basis | Notes |
-|-------|------|----------|-----------------|-------|
-| Health Warning Included on Label | Checkbox | Yes (default checked) | 27 CFR Part 16 | The applicant confirms the government warning will appear on the label. Required for all beverages ≥ 0.5% ABV. |
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| Product Type | Dropdown | Yes | Options: Wine, Distilled Spirits, Malt Beverage. |
+| Source of Product | Radio | Yes | Domestic or Imported |
+| Brand Name | Text | Yes | The name under which the product is sold (e.g., "GREY GOOSE") |
+| Class/Type Designation | Text | Yes | e.g., "Vodka," "Red Wine," "IPA" |
+| Alcohol Content | Text | Yes | ABV percentage as shown on label. Accept formats like "40%", "40", "40% Alc./Vol." |
+| Net Contents | Text | Yes | Volume (e.g., "750 mL", "12 fl oz", "1 L"). Must be a standard of fill. |
+| Name and Address on Label | Text | Yes | The bottler/importer name and address as it appears on the label |
+| Country of Origin | Text | Conditional | Required if Source = Imported. Country of origin as shown on label. |
+| Health Warning Confirmed | Checkbox | Yes (default checked) | The applicant confirms the government warning will appear on the label. Required for all beverages >= 0.5% ABV (27 CFR Part 16). |
 
 The exact mandated warning text is:
 
@@ -149,10 +102,9 @@ The exact mandated warning text is:
 
 **Form Validation Rules:**
 - All required fields must be filled before proceeding to Step 2.
-- Alcohol Content must be a valid number or numeric string (0–100 range).
+- Alcohol Content must be a valid number or numeric string (0-100 range).
 - Net Contents must include a numeric value and a unit.
-- If "Resubmission After Rejection" is selected, the previous TTB ID field becomes required.
-- Conditional fields appear/disappear dynamically based on Product Type and Source selections.
+- If Source = Imported, Country of Origin is required.
 
 #### Step 2: Label Image Upload
 
@@ -161,7 +113,6 @@ The exact mandated warning text is:
 - A preview of each uploaded image is displayed.
 - A drag-and-drop zone plus a standard file picker button.
 - At least one image is required to proceed.
-- The user can add optional notes about the label (e.g., "Net contents is blown into glass, not on label").
 
 #### Submission
 
@@ -278,38 +229,27 @@ The following checks are performed, organized by priority:
 | Health Warning Statement Present | The government warning text appears on the label | Check that "GOVERNMENT WARNING" appears. Verify key phrases from the mandated text are present: "Surgeon General," "women should not drink," "pregnancy," "birth defects," "impairs your ability to drive," "operate machinery." |
 | Name and Address Present | Bottler/importer name and address on label | Verify the label contains a name and address following an appropriate phrase like "Bottled By," "Produced By," "Imported By," etc. Compare against the form entry. |
 
-#### Tier 2: Conditional Checks (based on product type and form data)
+#### Tier 2: Conditional Checks (based on form data)
 
 | Check | Applies To | Description |
 |-------|-----------|-------------|
-| Fanciful Name Match | All (if provided) | If a fanciful name was entered, verify it appears on the label. |
-| Appellation of Origin | Wine | If entered on form, verify it appears on the brand label alongside the designation. |
-| Grape Varietal Match | Wine | If entered on form, verify the varietal(s) appear on the label. |
-| Vintage Date Match | Wine | If entered on form, verify the year appears on the label. |
-| Sulfite Declaration | Wine, Spirits | If indicated on form, verify "Contains Sulfites" or equivalent appears on label. |
-| Country of Origin | Imported products | Verify a country of origin statement is present on the label. |
-| Age Statement | Spirits | If provided on form, verify it appears on the label. |
-| State of Distillation | Spirits | If provided on form, verify it appears on the label. |
-| Commodity Statement | Spirits | If provided on form, verify it appears on the label. |
-| Coloring Materials Disclosure | Spirits | If indicated on form, verify declaration is on label. |
-| FD&C Yellow #5 | All (if indicated) | If checked on form, verify disclosure appears on label. |
-| Cochineal/Carmine | All (if indicated) | If checked on form, verify disclosure appears on label. |
+| Country of Origin | Imported products | Verify a country of origin statement is present on the label. Must match the value entered on the form. |
 
 #### Tier 3: Compliance Warnings (informational, do not block auto-approval)
 
 | Check | Description |
 |-------|-------------|
-| Same Field of Vision | For spirits: brand name, alcohol content, and class/type should appear in the same field of vision. GPT-4o can assess whether these are visually on the same side of the container. |
+| Same Field of Vision | Brand name, alcohol content, and class/type should appear in the same field of vision. GPT-4o can assess whether these are visually on the same side of the container. |
 | Health Warning Formatting | "GOVERNMENT WARNING" should appear in all caps and bold. "Surgeon" and "General" should be capitalized. Warning should be separate from other text. |
-| Designation Consistency | No conflicting or inconsistent designations on the label (e.g., "vodka with natural flavors" vs. just "vodka"). |
-| Standard of Fill | Verify net contents matches a TTB-approved standard of fill (e.g., 50 mL, 100 mL, 200 mL, 375 mL, 750 mL, 1 L, 1.75 L for spirits). |
+| Designation Consistency | No conflicting or inconsistent designations on the label. |
+| Standard of Fill | Verify net contents matches a TTB-approved standard of fill (e.g., 50 mL, 100 mL, 200 mL, 375 mL, 750 mL, 1 L, 1.75 L). |
 
 ### 6.3 GPT-4o Prompt Structure
 
-The system sends the label image(s) plus the form data to GPT-4o with a structured prompt that:
+The system sends the label image(s) plus the 9 core form fields to GPT-4o with a structured prompt that:
 
 1. Instructs the model to extract all visible text from the label image.
-2. Provides the form data as a JSON object for comparison.
+2. Provides the form data (the 9 submitted fields) as a JSON object for comparison.
 3. Asks for a structured JSON response with:
    - `extracted_text`: the full raw text found on the label.
    - `field_results`: an array of objects, each with `field_name`, `form_value`, `label_value`, `match_status` (MATCH / MISMATCH / NOT_FOUND / NOT_APPLICABLE), and `notes`.
@@ -340,7 +280,7 @@ The system sends the label image(s) plus the form data to GPT-4o with a structur
 
 ## 7. Data Model (Firestore Collections)
 
-The data layer uses **Cloud Firestore** (Firebase's NoSQL document database). Data is organized into top-level collections and subcollections. Firestore's document model naturally supports the nested/flexible fields needed for product-type-specific data without requiring migrations.
+The data layer uses **Cloud Firestore** (Firebase's NoSQL document database). Data is organized into top-level collections and subcollections. Firestore's document model naturally supports the submission data without requiring migrations.
 
 ### 7.1 `users` Collection
 
@@ -372,35 +312,17 @@ users/{uid}
 ```
 submissions/{submissionId}
 ├── userId: string (FK → users/{uid})
-├── serialNumber: string
 ├── productType: "wine" | "distilled_spirits" | "malt_beverage"
 ├── source: "domestic" | "imported"
 ├── brandName: string (required)
-├── fancifulName: string | null
 ├── classTypeDesignation: string (required)
-├── statementOfComposition: string | null
 ├── alcoholContent: string (required)
 ├── netContents: string (required)
 ├── nameAddressOnLabel: string (required)
-├── applicationType: string[] (e.g., ["cola", "resubmission"])
-├── resubmissionTtbId: string | null
-├── formulaNumber: string | null
-├── containerInfo: string | null
-├── grapeVarietals: string | null           # wine only
-├── appellationOfOrigin: string | null       # wine only
-├── vintageDate: string | null               # wine only
-├── countryOfOrigin: string | null           # imported only
-├── ageStatement: string | null              # spirits only
-├── stateOfDistillation: string | null       # spirits only
-├── commodityStatement: string | null        # spirits only
-├── coloringMaterials: string | null         # spirits only
-├── fdncYellow5: boolean (default false)
-├── cochinealCarmine: boolean (default false)
-├── sulfiteDeclaration: boolean (default false)
+├── countryOfOrigin: string | null           # required if source = imported
 ├── healthWarningConfirmed: boolean (default true)
-├── foreignWinePercentage: string | null     # wine only
-├── applicantNotes: string | null
 ├── status: "pending" | "approved" | "needs_revision" | "rejected"
+├── needsAttention: boolean                  # flag for admin dashboard filtering
 ├── validationInProgress: boolean            # lock flag for race conditions
 ├── version: number                          # optimistic locking counter
 ├── createdAt: Timestamp
@@ -550,8 +472,8 @@ Authentication is handled entirely by the Firebase Client SDK. No custom backend
 ### 9.2 User Pages
 - **Profile Setup / Edit**: Form with all profile fields from Section 3.2.
 - **Dashboard**: Submission summary stats + submissions table + new submission button.
-- **New Submission — Step 1 (Form)**: Dynamic form based on Product Type selection. Clear field labels, helper text for complex fields, inline validation.
-- **New Submission — Step 2 (Image Upload)**: Drag-and-drop zone, image previews, notes field.
+- **New Submission — Step 1 (Form)**: Flat form with 9 core fields (same for all product types). Clear field labels, helper text for complex fields, inline validation. Country of Origin field shown conditionally when Source = Imported.
+- **New Submission — Step 2 (Image Upload)**: Drag-and-drop zone, image previews.
 - **New Submission — Review & Submit**: Read-only summary of all data and images with a Submit button.
 - **Submission Detail**: Full form data, label images, validation results checklist, admin feedback (if any), edit/resubmit buttons (when applicable).
 

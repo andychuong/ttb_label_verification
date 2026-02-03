@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#faf8f0"/>
+      <stop offset="100%" style="stop-color:#f0ead6"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#b8860b"/>
+      <stop offset="50%" style="stop-color:#daa520"/>
+      <stop offset="100%" style="stop-color:#b8860b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Label background -->
+  <rect width="600" height="900" rx="8" fill="url(#bg)" stroke="#c9b99a" stroke-width="2"/>
+
+  <!-- Decorative border -->
+  <rect x="20" y="20" width="560" height="860" rx="4" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+  <rect x="28" y="28" width="544" height="844" rx="3" fill="none" stroke="url(#gold)" stroke-width="0.5"/>
+
+  <!-- Top decorative line -->
+  <line x1="80" y1="60" x2="520" y2="60" stroke="#b8860b" stroke-width="0.5"/>
+  <circle cx="300" cy="60" r="4" fill="none" stroke="#b8860b" stroke-width="0.5"/>
+
+  <!-- Vintage year -->
+  <text x="300" y="105" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#2c1810" letter-spacing="8">2021</text>
+
+  <!-- Decorative divider -->
+  <line x1="120" y1="120" x2="200" y2="120" stroke="#b8860b" stroke-width="0.5"/>
+  <circle cx="220" cy="120" r="2" fill="#b8860b"/>
+  <line x1="240" y1="120" x2="360" y2="120" stroke="#b8860b" stroke-width="0.5"/>
+  <circle cx="380" cy="120" r="2" fill="#b8860b"/>
+  <line x1="400" y1="120" x2="480" y2="120" stroke="#b8860b" stroke-width="0.5"/>
+
+  <!-- Appellation -->
+  <text x="300" y="160" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#5a4a3a" letter-spacing="3">NAPA VALLEY</text>
+
+  <!-- Brand Name -->
+  <text x="300" y="230" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="#2c1810" letter-spacing="2">GOLDEN RIDGE</text>
+
+  <!-- Fanciful Name -->
+  <text x="300" y="275" text-anchor="middle" font-family="Georgia, serif" font-size="24" font-style="italic" fill="#6b5b4a" letter-spacing="4">Reserve Selection</text>
+
+  <!-- Decorative divider -->
+  <line x1="150" y1="300" x2="450" y2="300" stroke="#b8860b" stroke-width="0.5"/>
+
+  <!-- Grape Varietal -->
+  <text x="300" y="345" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#2c1810" letter-spacing="5">CABERNET SAUVIGNON</text>
+
+  <!-- Estate designation -->
+  <text x="300" y="380" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#7a6a5a" letter-spacing="4">ESTATE GROWN &amp; BOTTLED</text>
+
+  <!-- Decorative divider -->
+  <line x1="200" y1="405" x2="400" y2="405" stroke="#b8860b" stroke-width="0.5"/>
+
+  <!-- Description text -->
+  <text x="300" y="440" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#6b5b4a">
+    This wine exhibits deep ruby color with aromas of blackcurrant,
+  </text>
+  <text x="300" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#6b5b4a">
+    cedar, and vanilla. Full-bodied with refined tannins and a
+  </text>
+  <text x="300" y="472" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#6b5b4a">
+    long, elegant finish. Best enjoyed 2024-2035.
+  </text>
+
+  <!-- Alcohol content -->
+  <text x="300" y="520" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#2c1810" letter-spacing="2">ALC. 14.5% BY VOL.</text>
+
+  <!-- Net contents -->
+  <text x="300" y="548" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#5a4a3a" letter-spacing="1">750 mL</text>
+
+  <!-- Decorative divider -->
+  <line x1="180" y1="570" x2="420" y2="570" stroke="#b8860b" stroke-width="0.5"/>
+
+  <!-- Name and Address -->
+  <text x="300" y="600" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#5a4a3a" letter-spacing="2">PRODUCED &amp; BOTTLED BY</text>
+  <text x="300" y="620" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#2c1810" font-weight="bold">GOLDEN RIDGE ESTATE WINERY</text>
+  <text x="300" y="640" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#5a4a3a">1250 Silverado Trail, Napa, CA 94558</text>
+
+  <!-- Government Warning -->
+  <rect x="50" y="670" width="500" height="105" fill="#faf8f0" stroke="#c9b99a" stroke-width="0.5" rx="2"/>
+  <text x="300" y="690" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#2c1810">GOVERNMENT WARNING: (1) ACCORDING TO THE SURGEON GENERAL,</text>
+  <text x="300" y="703" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c1810">WOMEN SHOULD NOT DRINK ALCOHOLIC BEVERAGES DURING</text>
+  <text x="300" y="716" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c1810">PREGNANCY BECAUSE OF THE RISK OF BIRTH DEFECTS.</text>
+  <text x="300" y="729" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c1810">(2) CONSUMPTION OF ALCOHOLIC BEVERAGES IMPAIRS YOUR ABILITY</text>
+  <text x="300" y="742" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c1810">TO DRIVE A CAR OR OPERATE MACHINERY, AND MAY CAUSE</text>
+  <text x="300" y="755" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c1810">HEALTH PROBLEMS.</text>
+  <text x="300" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#7a6a5a">CONTAINS SULFITES</text>
+
+  <!-- Bottom info -->
+  <text x="300" y="810" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#7a6a5a">SERIAL NO. 26-001</text>
+
+  <!-- Barcode placeholder -->
+  <rect x="220" y="825" width="160" height="35" fill="none" stroke="#c9b99a" stroke-width="0.5"/>
+  <g transform="translate(225,828)" fill="#2c1810">
+    <rect x="0" y="0" width="2" height="28"/><rect x="5" y="0" width="1" height="28"/>
+    <rect x="9" y="0" width="3" height="28"/><rect x="14" y="0" width="1" height="28"/>
+    <rect x="18" y="0" width="2" height="28"/><rect x="23" y="0" width="1" height="28"/>
+    <rect x="27" y="0" width="3" height="28"/><rect x="33" y="0" width="1" height="28"/>
+    <rect x="37" y="0" width="2" height="28"/><rect x="42" y="0" width="1" height="28"/>
+    <rect x="46" y="0" width="3" height="28"/><rect x="52" y="0" width="1" height="28"/>
+    <rect x="56" y="0" width="2" height="28"/><rect x="61" y="0" width="1" height="28"/>
+    <rect x="65" y="0" width="3" height="28"/><rect x="70" y="0" width="2" height="28"/>
+    <rect x="75" y="0" width="1" height="28"/><rect x="79" y="0" width="3" height="28"/>
+    <rect x="85" y="0" width="1" height="28"/><rect x="89" y="0" width="2" height="28"/>
+    <rect x="94" y="0" width="1" height="28"/><rect x="98" y="0" width="2" height="28"/>
+    <rect x="103" y="0" width="3" height="28"/><rect x="109" y="0" width="1" height="28"/>
+    <rect x="113" y="0" width="2" height="28"/><rect x="118" y="0" width="1" height="28"/>
+    <rect x="122" y="0" width="3" height="28"/><rect x="128" y="0" width="1" height="28"/>
+    <rect x="132" y="0" width="2" height="28"/><rect x="137" y="0" width="1" height="28"/>
+    <rect x="141" y="0" width="3" height="28"/><rect x="147" y="0" width="2" height="28"/>
+  </g>
+
+  <!-- Bottom decorative line -->
+  <line x1="80" y1="870" x2="520" y2="870" stroke="#b8860b" stroke-width="0.5"/>
+  <circle cx="300" cy="870" r="4" fill="none" stroke="#b8860b" stroke-width="0.5"/>
+</svg>

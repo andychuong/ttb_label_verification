@@ -44,13 +44,15 @@ Compare each form field value against what appears on the label. For each field,
 
 **Country of Origin** (imported products): Must be clearly stated on the label (e.g., "Product of France", "Imported from Scotland").
 
-**Grape Varietals** (wine): If claimed, must match label. At least 75% of the wine must be from the named varietal per TTB rules.
+**Fanciful Name**: If provided in form data, verify it appears on the label. Case-insensitive comparison. If not provided, skip this check (NOT_APPLICABLE).
 
-**Appellation of Origin** (wine): If present, must match label exactly.
+**Grape Varietals** (wine only): If provided in form data, verify the grape variety appears on the label. Case-insensitive. If not provided or product is not wine, mark NOT_APPLICABLE.
 
-**Vintage Date** (wine): If claimed, must match label.
+**Appellation of Origin** (wine only): If provided in form data, verify the appellation appears on the label. Case-insensitive. If not provided or product is not wine, mark NOT_APPLICABLE.
 
-**Age Statement** (spirits): If present, must match label exactly. Required for spirits aged less than 4 years.
+**Vintage Date** (wine only): If provided in form data, verify the vintage year appears on the label. Must be an exact numeric match. If not provided or product is not wine, mark NOT_APPLICABLE.
+
+**Alcohol Content** (malt beverages): For malt beverages, alcohol content may not be required on the label per 27 CFR Part 7. If the form data field is empty, mark as NOT_APPLICABLE.
 
 ### 4. Tier 1 Critical Checks
 These are mandatory compliance checks that must ALL pass for automatic approval:
@@ -61,13 +63,19 @@ These are mandatory compliance checks that must ALL pass for automatic approval:
 5. Health Warning Statement — present on label
 6. Name and Address — present on label
 
-### 5. Compliance Warnings
+### 5. Tier 2 Conditional Checks
+These fields are checked only when provided. They do not block auto-approval but are included in the report:
+1. Fanciful Name — if provided, verify on label
+2. Grape Varietals (wine) — if provided, verify on label
+3. Appellation of Origin (wine) — if provided, verify on label
+4. Vintage Date (wine) — if provided, exact year match on label
+5. Alcohol Content (malt beverage) — NOT_APPLICABLE if empty
+
+### 6. Compliance Warnings
 Flag potential compliance issues:
 - Missing mandatory label elements
 - Text too small to read (if apparent from image)
 - Misleading claims or statements
-- Missing sulfite declaration (for wines with >10 ppm sulfites)
-- Missing FD&C Yellow #5 or cochineal/carmine declarations if applicable
 
 ## Output Format
 Respond with a JSON object in this exact structure:
@@ -99,11 +107,13 @@ Respond with a JSON object in this exact structure:
 - Set confidence to "medium" if some text is difficult to read but you can make reasonable inferences
 - Set confidence to "high" if the image is clear and all text is readable
 - Always include at least these fieldResults: brandName, classTypeDesignation, alcoholContent, netContents, healthWarning, nameAndAddress
+- For Tier 2 fields, include fieldResults entries when the field is provided in form data (fancifulName, grapeVarietals, appellationOfOrigin, vintageDate)
 - Be thorough but concise in your notes`;
 
 export interface FormDataForPrompt {
   productType: string;
   source: string;
+  serialNumber: string;
   brandName: string;
   fancifulName?: string | null;
   classTypeDesignation: string;
@@ -111,17 +121,10 @@ export interface FormDataForPrompt {
   netContents: string;
   nameAddressOnLabel: string;
   countryOfOrigin?: string | null;
+  // Wine-specific
   grapeVarietals?: string | null;
   appellationOfOrigin?: string | null;
   vintageDate?: string | null;
-  ageStatement?: string | null;
-  stateOfDistillation?: string | null;
-  commodityStatement?: string | null;
-  coloringMaterials?: string | null;
-  statementOfComposition?: string | null;
-  fdncYellow5?: boolean;
-  cochinealCarmine?: boolean;
-  sulfiteDeclaration?: boolean;
 }
 
 export function buildUserMessage(formData: FormDataForPrompt): string {

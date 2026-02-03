@@ -91,6 +91,7 @@ function buildFormData(
   return {
     productType: data.productType,
     source: data.source,
+    serialNumber: data.serialNumber,
     brandName: data.brandName,
     fancifulName: data.fancifulName || null,
     classTypeDesignation: data.classTypeDesignation,
@@ -101,14 +102,6 @@ function buildFormData(
     grapeVarietals: data.grapeVarietals || null,
     appellationOfOrigin: data.appellationOfOrigin || null,
     vintageDate: data.vintageDate || null,
-    ageStatement: data.ageStatement || null,
-    stateOfDistillation: data.stateOfDistillation || null,
-    commodityStatement: data.commodityStatement || null,
-    coloringMaterials: data.coloringMaterials || null,
-    statementOfComposition: data.statementOfComposition || null,
-    fdncYellow5: data.fdncYellow5 || false,
-    cochinealCarmine: data.cochinealCarmine || false,
-    sulfiteDeclaration: data.sulfiteDeclaration || false,
   };
 }
 
@@ -388,8 +381,11 @@ export const onSubmissionCreated = onDocumentCreated(
  * onSubmissionUpdated
  *
  * Firestore onUpdate trigger on submissions/{id}.
- * Detects resubmissions (needs_revision → pending) and re-triggers validation.
- * Stale validation results are handled by version checks within runValidation.
+ * Re-triggers validation when:
+ *   1. Resubmit: needs_revision → pending
+ *   2. Edit: pending → pending with version bump (and not currently validating)
+ * Internal writes (validationInProgress, needsAttention) don't bump version,
+ * so they won't cause infinite trigger loops.
  */
 export const onSubmissionUpdated = onDocumentUpdated(
   {
@@ -405,16 +401,20 @@ export const onSubmissionUpdated = onDocumentUpdated(
 
     const submissionId = event.params.id;
 
-    // Only re-trigger validation on resubmit (needs_revision → pending).
-    // All other updates (validation writes, edits, etc.) are ignored
-    // to prevent infinite trigger loops.
     const isResubmit =
       before.status === "needs_revision" && after.status === "pending";
 
-    if (!isResubmit) return;
+    const isEdit =
+      before.status === "pending" &&
+      after.status === "pending" &&
+      after.version > before.version &&
+      !after.validationInProgress;
 
+    if (!isResubmit && !isEdit) return;
+
+    const reason = isResubmit ? "Resubmission" : "Edit";
     console.log(
-      `Resubmission detected for ${submissionId} (version ${after.version})`
+      `${reason} detected for ${submissionId} (version ${after.version})`
     );
     await runValidation(submissionId, after, after.version);
   }

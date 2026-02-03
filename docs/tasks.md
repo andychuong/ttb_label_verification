@@ -1,7 +1,7 @@
 # TTB Label Verification App - Build Task List
 
 **Generated:** February 1, 2026
-**Last Updated:** February 2, 2026
+**Last Updated:** February 3, 2026
 **Source Documents:** prd.md, architecture.md, workflow-examples.md
 
 ---
@@ -114,20 +114,14 @@
 
 - [x] **5.1** Create `src/app/(user)/submissions/new/page.tsx` — Multi-step form orchestrator (manages step state, step navigation, submits to API + uploads image)
 - [x] **5.2** Create `src/app/(user)/submissions/new/step-form.tsx` — Step 1: Application Form
-  - Product type dropdown (Wine, Distilled Spirits, Malt Beverage) controlling conditional field visibility
-  - All common fields: Serial Number, Source, Brand Name, Fanciful Name, Alcohol Content, Net Contents, Name & Address, Application Type checkboxes, Formula Number, Container Info
-  - Distilled spirits fields: Class/Type, Statement of Composition, Age Statement, Country of Origin (if imported), State of Distillation, Commodity Statement, Coloring Materials, FD&C Yellow #5, Cochineal/Carmine, Sulfite Declaration
-  - Wine fields: Class/Type, Grape Varietal(s), Appellation of Origin, Vintage Date, Country of Origin (if imported), Sulfite Declaration, FD&C Yellow #5, Cochineal/Carmine, Foreign Wine Percentage
-  - Malt beverage fields: Class/Type, Country of Origin (if imported)
-  - Health Warning confirmation checkbox
-  - Conditional field rendering based on Product Type and Source
-  - Resubmission TTB ID field (conditional on Application Type selection)
+  - 9 core TTB label verification fields: Product Type, Source, Brand Name, Class/Type Designation, Alcohol Content, Net Contents, Name & Address on Label, Country of Origin (conditional on imported), Health Warning confirmation
+  - No product-type-specific field sections — all product types use the same flat form
   - React Hook Form + Zod validation
 - [x] **5.3** Create `src/app/(user)/submissions/new/step-upload.tsx` — Step 2: Image Upload
   - Uses reusable ImageUploader component
   - v1.0: Single image upload
 - [x] **5.4** Create `src/app/(user)/submissions/new/step-review.tsx` — Step 3: Review & Submit
-  - Read-only summary of all form data (two-column layout)
+  - Read-only summary of all 9 form fields
   - Image thumbnail preview
   - Confirm & Submit button → POST /api/submissions + upload to Storage
 - [x] **5.5** Create `src/components/submission/ImageUploader.tsx` — Reusable image upload component with drag-and-drop, file picker, validation, preview, remove
@@ -249,22 +243,22 @@
 
 ---
 
-## Phase 11: Firestore Security Rules & Indexes
+## Phase 11: Firestore Security Rules & Indexes ✅
 
-- [ ] **11.1** Write `firestore.rules`:
+- [x] **11.1** Write `firestore.rules`:
   - Users: read/write own profile; admins read all
   - Submissions: users read own; admins read all; users create with own userId; users update only if pending & not validating; admins update all
   - Subcollections: inherit parent access patterns
-- [ ] **11.2** Write `firestore.indexes.json` — composite indexes:
+- [x] **11.2** Write `firestore.indexes.json` — composite indexes:
   - `submissions`: `userId` ASC + `createdAt` DESC
   - `submissions`: `userId` ASC + `status` ASC + `createdAt` DESC
   - `submissions`: `status` ASC + `createdAt` DESC
   - `submissions`: `productType` ASC + `createdAt` DESC
   - `submissions`: `needsAttention` ASC + `createdAt` ASC (for admin queue)
-- [ ] **11.3** Write `storage.rules`:
+- [x] **11.3** Write `storage.rules`:
   - Authenticated users can upload images (valid image types, <10 MB)
   - Authenticated users can read images
-- [ ] **11.4** Deploy rules and indexes to Firebase
+- [x] **11.4** Deploy rules and indexes to Firebase
 
 ---
 
@@ -282,18 +276,15 @@
 
 ## Phase 13: v1.1 — Polish & Stability (Post-MVP)
 
-- [ ] **13.1** Add Wine product type with all conditional fields
-- [ ] **13.2** Add Malt Beverage product type with all conditional fields
-- [ ] **13.3** Multi-image upload (front, back, other) with image type tagging
-- [ ] **13.4** Edit pending submission flow (with validationInProgress lock check and optimistic locking)
-- [ ] **13.5** Resubmission flow ("Revise & Resubmit" button, pre-fill form, version history)
-- [ ] **13.6** Duplicate & Edit flow (create new submission from rejected one)
-- [ ] **13.7** Real-time Firestore `onSnapshot` listeners on dashboards and detail pages
-- [ ] **13.8** Race condition handling (Cloud Function version check, 409/423 responses)
-- [ ] **13.9** Tier 2 conditional validation checks (fanciful name, appellation, varietal, vintage, sulfites, country of origin, age statement, state of distillation, commodity statement, coloring materials, FD&C Yellow #5, cochineal/carmine)
-- [ ] **13.10** Cursor-based pagination on both dashboards
-- [ ] **13.11** Forgot password flow (Firebase `sendPasswordResetEmail`)
-- [ ] **13.12** Status and product type filtering on dashboards
+- [ ] **13.1** Multi-image upload (front, back, other) with image type tagging
+- [ ] **13.2** Edit pending submission flow (with validationInProgress lock check and optimistic locking)
+- [ ] **13.3** Resubmission flow ("Revise & Resubmit" button, pre-fill form, version history)
+- [ ] **13.4** Duplicate & Edit flow (create new submission from rejected one)
+- [ ] **13.5** Real-time Firestore `onSnapshot` listeners on dashboards and detail pages
+- [ ] **13.6** Race condition handling (Cloud Function version check, 409/423 responses)
+- [ ] **13.7** Cursor-based pagination on both dashboards
+- [ ] **13.8** Forgot password flow (Firebase `sendPasswordResetEmail`)
+- [ ] **13.9** Status and product type filtering on dashboards
 
 ---
 

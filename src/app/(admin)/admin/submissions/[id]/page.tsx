@@ -29,13 +29,6 @@ const sourceLabels: Record<string, string> = {
   imported: "Imported",
 };
 
-const applicationTypeLabels: Record<string, string> = {
-  cola: "Certificate of Label Approval",
-  exemption: "Certificate of Exemption",
-  distinctive_bottle: "Distinctive Liquor Bottle",
-  resubmission: "Resubmission After Rejection",
-};
-
 function formatDate(timestamp: unknown): string {
   if (!timestamp) return "\u2014";
   const ts = timestamp as { seconds?: number; toDate?: () => Date };
@@ -139,11 +132,13 @@ export default function AdminSubmissionDetailPage({
             getToken={getToken}
           />
 
-          {/* AI Validation Report (admin-level detail) */}
-          {latestValidation && <AiReportViewer result={latestValidation} />}
+          {/* AI Validation Report (admin-level detail) — hide stale results while validating */}
+          {latestValidation && !submission.validationInProgress && (
+            <AiReportViewer result={latestValidation} />
+          )}
 
           {/* User-facing Validation Summary */}
-          {latestValidation && (
+          {latestValidation && !submission.validationInProgress && (
             <ValidationResultsPanel
               result={latestValidation}
               validationInProgress={submission.validationInProgress}
@@ -186,16 +181,16 @@ export default function AdminSubmissionDetailPage({
             <CardHeader title="Submission Details" />
             <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
               <FieldRow
-                label="Serial Number"
-                value={submission.serialNumber}
-              />
-              <FieldRow
                 label="Product Type"
                 value={productTypeLabels[submission.productType]}
               />
               <FieldRow
                 label="Source"
                 value={sourceLabels[submission.source]}
+              />
+              <FieldRow
+                label="Serial Number"
+                value={submission.serialNumber}
               />
               <FieldRow label="Brand Name" value={submission.brandName} />
               <FieldRow
@@ -219,50 +214,12 @@ export default function AdminSubmissionDetailPage({
                 label="Name & Address on Label"
                 value={submission.nameAddressOnLabel}
               />
-              <FieldRow
-                label="Application Type"
-                value={submission.applicationType
-                  ?.map((t) => applicationTypeLabels[t] || t)
-                  .join(", ")}
-              />
-              <FieldRow
-                label="Resubmission TTB ID"
-                value={submission.resubmissionTtbId}
-              />
-              <FieldRow
-                label="Formula Number"
-                value={submission.formulaNumber}
-              />
-              <FieldRow
-                label="Container Info"
-                value={submission.containerInfo}
-              />
-
-              {submission.productType === "distilled_spirits" && (
-                <>
-                  <FieldRow
-                    label="Statement of Composition"
-                    value={submission.statementOfComposition}
-                  />
-                  <FieldRow
-                    label="Age Statement"
-                    value={submission.ageStatement}
-                  />
-                  <FieldRow
-                    label="State of Distillation"
-                    value={submission.stateOfDistillation}
-                  />
-                  <FieldRow
-                    label="Commodity Statement"
-                    value={submission.commodityStatement}
-                  />
-                  <FieldRow
-                    label="Coloring Materials"
-                    value={submission.coloringMaterials}
-                  />
-                </>
+              {submission.source === "imported" && (
+                <FieldRow
+                  label="Country of Origin"
+                  value={submission.countryOfOrigin}
+                />
               )}
-
               {submission.productType === "wine" && (
                 <>
                   <FieldRow
@@ -274,46 +231,15 @@ export default function AdminSubmissionDetailPage({
                     value={submission.appellationOfOrigin}
                   />
                   <FieldRow
-                    label="Vintage Date"
+                    label="Vintage Year"
                     value={submission.vintageDate}
-                  />
-                  <FieldRow
-                    label="Foreign Wine Percentage"
-                    value={submission.foreignWinePercentage}
                   />
                 </>
               )}
-
-              {submission.source === "imported" && (
-                <FieldRow
-                  label="Country of Origin"
-                  value={submission.countryOfOrigin}
-                />
-              )}
-
-              <FieldRow
-                label="FD&C Yellow #5"
-                value={submission.fdncYellow5}
-              />
-              <FieldRow
-                label="Cochineal/Carmine"
-                value={submission.cochinealCarmine}
-              />
-              <FieldRow
-                label="Sulfite Declaration"
-                value={submission.sulfiteDeclaration}
-              />
               <FieldRow
                 label="Health Warning Confirmed"
                 value={submission.healthWarningConfirmed}
               />
-
-              <div className="sm:col-span-2">
-                <FieldRow
-                  label="Applicant Notes"
-                  value={submission.applicantNotes}
-                />
-              </div>
             </dl>
           </Card>
 

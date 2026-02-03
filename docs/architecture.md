@@ -108,7 +108,7 @@ The application is a full-stack web platform with two portals (User and Admin) t
 |-----------|---------------|
 | **Pages (App Router)** | Route-level components for each screen: login, register, profile, dashboard, submission form (steps 1–3), submission detail, admin dashboard, admin detail. |
 | **Layout Components** | Shared shell with sidebar navigation, header with user info, and role-based nav items (user vs. admin). |
-| **Form Engine** | Dynamic multi-step form for new submissions. Handles conditional field rendering based on product type, inline validation, and step navigation. |
+| **Form Engine** | Multi-step form for new submissions with core TTB label verification fields, inline validation, and step navigation. |
 | **Image Uploader** | Drag-and-drop + file picker component. Handles client-side file type/size validation, preview generation, and direct upload to Firebase Storage. |
 | **Real-Time Listeners** | Firestore `onSnapshot` subscriptions on the user's submissions query and individual submission documents for live status updates. |
 | **Auth Context** | React context wrapping `firebase/auth` state. Provides current user, role, loading state, and guards for protected routes. |
@@ -417,7 +417,7 @@ Admin accounts are not self-service. They are created by:
         },
         {
           "type": "text",
-          "text": "Form data: {\"brandName\": \"Old Tom Distillery\", \"classType\": \"Kentucky Straight Bourbon Whiskey\", \"alcoholContent\": \"45\", ...}"
+          "text": "Form data: {\"brandName\": \"Old Tom Distillery\", \"classTypeDesignation\": \"Kentucky Straight Bourbon Whiskey\", \"alcoholContent\": \"45\", \"netContents\": \"750 mL\", \"nameAddressOnLabel\": \"Bottled By Old Tom Distillery, Louisville, KY 40202\", \"productType\": \"distilled_spirits\", \"source\": \"domestic\"}"
         }
       ]
     }
@@ -918,9 +918,9 @@ npm run seed:admin
 | Area | What's Included |
 |------|----------------|
 | **Auth** | Email/password registration and login via Firebase Auth. Profile setup with all required fields (name, email, phone, company, address, permit number). Role-based routing (user vs. admin). |
-| **Submission Form** | Multi-step form: Step 1 (form fields) → Step 2 (image upload) → Step 3 (review & submit). All common fields implemented. **Distilled Spirits** product type fully supported with all conditional fields. |
+| **Submission Form** | Multi-step form: Step 1 (9 core TTB fields) → Step 2 (image upload) → Step 3 (review & submit). Single flat form — no product-type-specific conditional fields. |
 | **Image Upload** | Single image upload (front label) via Firebase Storage. File type and size validation (JPEG, PNG, ≤ 10 MB). Preview display. |
-| **AI Validation** | GPT-4o vision integration via Cloud Function. Tier 1 critical checks: brand name, class/type, alcohol content, net contents, health warning, name & address. Structured JSON response parsing. |
+| **AI Validation** | GPT-4o vision integration via Cloud Function. Tier 1 critical checks: brand name, class/type designation, alcohol content, net contents, health warning, name & address. Structured JSON response parsing. |
 | **Status Flow** | Pending → Approved (auto) or Pending + needsAttention (flagged). Admin can approve, send for revision, or reject. User sees status on dashboard. |
 | **User Dashboard** | Submissions table with status, sorted by date. Click to view detail. Summary stat counts. |
 | **Admin Dashboard** | All submissions table. "Needs Attention" filtered tab. Click into detail to see AI report and take action. |
@@ -928,7 +928,7 @@ npm run seed:admin
 | **Error Handling** | GPT-4o retry (3x with backoff). Low-confidence flagging. Corrupt image rejection at upload time. |
 | **Deployment** | Vercel (Next.js) + Firebase (Firestore, Auth, Storage, Functions). Live URL accessible. |
 
-**Not in v1.0:** Wine/malt beverage product types, multi-image upload, submission editing, revision/resubmission flow, real-time listeners, Tier 2/3 checks, optimistic locking.
+**Not in v1.0:** Multi-image upload, submission editing, revision/resubmission flow, real-time listeners, Tier 2/3 checks, optimistic locking.
 
 **Estimated effort:** 1 day.
 
@@ -936,20 +936,18 @@ npm run seed:admin
 
 ### v1.1 — Polish & Stability
 
-**Goal:** Add the editing/resubmission workflows, real-time updates, and race condition handling. Support all three product types. Harden the experience with proper concurrency controls.
+**Goal:** Add the editing/resubmission workflows, real-time updates, and race condition handling. Harden the experience with proper concurrency controls.
 
 **Scope:**
 
 | Area | What's Added |
 |------|-------------|
-| **Product Types** | Wine and Malt Beverage product types with all conditional fields (grape varietal, appellation, vintage, sulfite declaration, country of origin). Dynamic form rendering based on product type selection. |
 | **Multi-Image Upload** | Support front, back, and supplemental label images. Image type tagging (brand_front, back, other). Drag-and-drop zone. |
 | **Edit Pending Submission** | Edit button on pending submissions. `validationInProgress` lock check. Firestore transaction with optimistic locking (`version` field). Re-triggers validation on save. |
 | **Resubmission Flow** | "Needs Revision" status with admin feedback display. "Revise & Resubmit" button that pre-fills the form with existing data. Version history tracked in `history` subcollection. |
 | **Duplicate & Edit** | "Duplicate & Edit" button on rejected submissions. Creates a new submission pre-filled from the old one with "Resubmission" application type auto-checked. |
 | **Real-Time Updates** | Firestore `onSnapshot` listeners on user dashboard, submission detail, and admin queue. Status changes appear instantly without page refresh. |
 | **Race Condition Handling** | Cloud Function version check before writing results. Edit blocked when `validationInProgress` is true. 409/423 error responses with user-friendly messages. |
-| **Tier 2 Checks** | Conditional validation checks: fanciful name, appellation, varietal, vintage, sulfite declaration, country of origin, age statement, state of distillation, commodity statement, coloring materials, FD&C Yellow #5, cochineal/carmine. |
 | **Pagination** | Cursor-based pagination on both user and admin dashboards. Status and product type filtering. |
 | **Forgot Password** | Firebase `sendPasswordResetEmail` integration. Reset password page. |
 

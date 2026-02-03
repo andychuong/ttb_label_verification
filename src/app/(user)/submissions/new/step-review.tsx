@@ -9,13 +9,6 @@ const productTypeLabels: Record<string, string> = {
   malt_beverage: "Malt Beverage",
 };
 
-const applicationTypeLabels: Record<string, string> = {
-  cola: "Certificate of Label Approval (COLA)",
-  exemption: "Certificate of Exemption",
-  distinctive_bottle: "Distinctive Liquor Bottle Approval",
-  resubmission: "Resubmission After Rejection",
-};
-
 interface StepReviewProps {
   formData: SubmissionFormData;
   imageFile: File;
@@ -34,16 +27,6 @@ function Field({ label, value }: { label: string; value: string | undefined | nu
   );
 }
 
-function BoolField({ label, value }: { label: string; value: boolean }) {
-  if (!value) return null;
-  return (
-    <div>
-      <dt className="text-xs font-medium text-gray-500">{label}</dt>
-      <dd className="mt-0.5 text-sm text-gray-900">Yes</dd>
-    </div>
-  );
-}
-
 export default function StepReview({
   formData,
   imageFile,
@@ -51,8 +34,6 @@ export default function StepReview({
   onSubmit,
   onBack,
 }: StepReviewProps) {
-  const isSpirits = formData.productType === "distilled_spirits";
-  const isWine = formData.productType === "wine";
   const previewUrl = URL.createObjectURL(imageFile);
 
   return (
@@ -72,7 +53,6 @@ export default function StepReview({
           Product Information
         </h3>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Serial Number" value={formData.serialNumber} />
           <Field
             label="Product Type"
             value={productTypeLabels[formData.productType]}
@@ -81,112 +61,56 @@ export default function StepReview({
             label="Source"
             value={formData.source === "domestic" ? "Domestic" : "Imported"}
           />
+          <Field label="Serial Number" value={formData.serialNumber} />
           <Field label="Brand Name" value={formData.brandName} />
           <Field label="Fanciful Name" value={formData.fancifulName} />
-          <Field label="Alcohol Content" value={`${formData.alcoholContent}%`} />
+          <Field
+            label="Class/Type Designation"
+            value={formData.classTypeDesignation}
+          />
+          <Field
+            label="Alcohol Content"
+            value={formData.alcoholContent ? `${formData.alcoholContent}%` : null}
+          />
           <Field label="Net Contents" value={formData.netContents} />
           <Field
             label="Name & Address on Label"
             value={formData.nameAddressOnLabel}
           />
-          <Field
-            label="Class/Type Designation"
-            value={formData.classTypeDesignation}
-          />
           <Field label="Country of Origin" value={formData.countryOfOrigin} />
         </dl>
       </div>
 
-      {/* Product-specific fields */}
-      {isSpirits && (
-        <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-            Distilled Spirits Details
-          </h3>
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
-              label="Statement of Composition"
-              value={formData.statementOfComposition}
-            />
-            <Field label="Age Statement" value={formData.ageStatement} />
-            <Field
-              label="State of Distillation"
-              value={formData.stateOfDistillation}
-            />
-            <Field
-              label="Commodity Statement"
-              value={formData.commodityStatement}
-            />
-            <Field
-              label="Coloring Materials"
-              value={formData.coloringMaterials}
-            />
-            <BoolField label="FD&C Yellow #5" value={formData.fdncYellow5} />
-            <BoolField
-              label="Cochineal/Carmine"
-              value={formData.cochinealCarmine}
-            />
-            <BoolField
-              label="Sulfite Declaration"
-              value={formData.sulfiteDeclaration}
-            />
-          </dl>
-        </div>
-      )}
+      {/* Wine Details (conditional) */}
+      {formData.productType === "wine" &&
+        (formData.grapeVarietals ||
+          formData.appellationOfOrigin ||
+          formData.vintageDate) && (
+          <div>
+            <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
+              Wine Details
+            </h3>
+            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Grape Varietals" value={formData.grapeVarietals} />
+              <Field
+                label="Appellation of Origin"
+                value={formData.appellationOfOrigin}
+              />
+              <Field label="Vintage Year" value={formData.vintageDate} />
+            </dl>
+          </div>
+        )}
 
-      {isWine && (
-        <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-            Wine Details
-          </h3>
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Grape Varietal(s)" value={formData.grapeVarietals} />
-            <Field
-              label="Appellation of Origin"
-              value={formData.appellationOfOrigin}
-            />
-            <Field label="Vintage Date" value={formData.vintageDate} />
-            <Field
-              label="Foreign Wine Percentage"
-              value={formData.foreignWinePercentage}
-            />
-            <BoolField
-              label="Sulfite Declaration"
-              value={formData.sulfiteDeclaration}
-            />
-            <BoolField label="FD&C Yellow #5" value={formData.fdncYellow5} />
-            <BoolField
-              label="Cochineal/Carmine"
-              value={formData.cochinealCarmine}
-            />
-          </dl>
-        </div>
-      )}
-
-      {/* Application Details */}
+      {/* Confirmation */}
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-          Application Details
+          Confirmation
         </h3>
-        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-medium text-gray-500">
-              Application Type
-            </dt>
-            <dd className="mt-0.5 text-sm text-gray-900">
-              {formData.applicationType
-                .map((t) => applicationTypeLabels[t] || t)
-                .join(", ")}
-            </dd>
-          </div>
-          <Field
-            label="Previous TTB ID"
-            value={formData.resubmissionTtbId}
-          />
-          <Field label="Formula Number" value={formData.formulaNumber} />
-          <Field label="Container Info" value={formData.containerInfo} />
-          <Field label="Applicant Notes" value={formData.applicantNotes} />
-        </dl>
+        <p className="text-sm text-gray-900">
+          {formData.healthWarningConfirmed
+            ? "Health warning statement confirmed"
+            : "Health warning statement NOT confirmed"}
+        </p>
       </div>
 
       {/* Image preview */}
