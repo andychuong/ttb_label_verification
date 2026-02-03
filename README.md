@@ -2,7 +2,7 @@
 
 AI-powered alcohol label verification prototype that automates the TTB (Alcohol and Tobacco Tax and Trade Bureau) label compliance review process. Producers submit product data and a label image; GPT-4o-mini extracts text from the label and validates it against the submitted form fields and federal labeling requirements.
 
-**Live demo:** <https://ttblabel-a7qi9hiti-andys-projects-bbece1af.vercel.app>
+**Live demo:** <https://ttblabel.vercel.app>
 
 ## Approach
 

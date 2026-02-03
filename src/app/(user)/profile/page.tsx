@@ -11,7 +11,7 @@ import {
 } from "@/lib/validation/formSchemas";
 
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, profileComplete, loading: authLoading } = useAuth();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [fetchError, setFetchError] = useState("");
@@ -35,6 +35,12 @@ export default function ProfilePage() {
       representativeId: "",
     },
   });
+
+  useEffect(() => {
+    if (!authLoading && profileComplete) {
+      router.replace("/dashboard");
+    }
+  }, [authLoading, profileComplete, router]);
 
   useEffect(() => {
     if (authLoading || !user) return;
