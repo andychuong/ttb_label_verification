@@ -509,6 +509,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 0: Project Initialization** | ✅ Complete | Feb 2, 2026 |
 | **Phase 1: Firebase Config & Shared Utilities** | ✅ Complete | Feb 2, 2026 |
 | **Phase 2: Authentication** | ✅ Complete | Feb 2, 2026 |
+| **Phase 3: User Profile** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -536,6 +537,11 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `scripts/set-admin.ts` — Admin seed script using `dotenv` + `firebase-admin`. Usage: `npx tsx scripts/set-admin.ts <USER_UID>`
 - `src/app/layout.tsx` — Root layout wraps children with `<AuthProvider>`. Metadata updated to "TTB Label Verification"
 - Dev dependencies added: `dotenv`, `tsx` (for running TypeScript scripts directly)
+
+### Phase 3 Notes
+- `src/app/api/profile/route.ts` — GET returns user profile from Firestore (or email + `profileComplete: false` if no doc exists). PUT validates body with `userProfileSchema`, writes to Firestore with `merge: true`, sets `profileComplete: true`. Preserves existing `role` field. Uses `FieldValue.serverTimestamp()` for `createdAt`/`updatedAt`
+- `src/app/(user)/profile/page.tsx` — React Hook Form + Zod profile form. Fetches existing profile on mount via GET `/api/profile`. Email field is pre-filled and read-only. Two-column grid layout. On save redirects to `/dashboard` after 1.5s
+- `src/app/(user)/settings/page.tsx` — Shows email, role, links to edit profile, and sign out button. Links back to dashboard
 
 ### Key Dependency Versions
 | Package | Version |

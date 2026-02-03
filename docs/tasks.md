@@ -71,14 +71,14 @@
 
 ---
 
-## Phase 3: User Profile
+## Phase 3: User Profile ✅
 
-- [ ] **3.1** Create `src/app/api/profile/route.ts` — GET (read profile) and PUT (update profile) endpoints with auth middleware
-- [ ] **3.2** Create `src/app/(user)/profile/page.tsx` — Profile setup/edit form:
-  - Full Name, Email (pre-filled), Phone Number, Company Name, Company Address, Mailing Address (optional), Permit/Registry Number, Representative ID (optional)
+- [x] **3.1** Create `src/app/api/profile/route.ts` — GET (read profile) and PUT (update profile) endpoints with auth middleware
+- [x] **3.2** Create `src/app/(user)/profile/page.tsx` — Profile setup/edit form:
+  - Full Name, Email (pre-filled, read-only), Phone Number, Company Name, Company Address, Mailing Address (optional), Permit/Registry Number, Representative ID (optional)
   - On save: update Firestore `users/{uid}`, set `profileComplete: true`
-  - Zod validation with inline error messages
-- [ ] **3.3** Create `src/app/(user)/settings/page.tsx` — Settings page linking to profile edit (can be same component)
+  - React Hook Form + Zod validation with inline error messages
+- [x] **3.3** Create `src/app/(user)/settings/page.tsx` — Settings page with email, role display, edit profile link, and sign out
 
 ---
 
