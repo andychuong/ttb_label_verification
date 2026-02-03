@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getAuth, connectAuthEmulator, browserLocalPersistence, setPersistence } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 
@@ -15,10 +15,14 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-if (process.env.NODE_ENV === "development") {
+if (
+  process.env.NODE_ENV === "development" &&
+  process.env.NEXT_PUBLIC_USE_EMULATORS !== "false"
+) {
   const isEmulator =
     typeof window !== "undefined" &&
     window.location.hostname === "localhost";

@@ -1,40 +1,91 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { RequireProfile } from "@/lib/auth/guards";
 import { useAuth } from "@/lib/auth/context";
 import { db } from "@/lib/firebase/client";
 import { uploadImage } from "@/lib/firebase/storage";
+import { LoadingState } from "@/components/ui";
 import type { SubmissionFormData } from "@/lib/validation/formSchemas";
+import type { ImageEntry } from "@/types/submission";
 import StepForm from "./step-form";
 import StepUpload from "./step-upload";
 import StepReview from "./step-review";
 
 const STEPS = ["Application Form", "Label Image", "Review & Submit"] as const;
 
-export default function NewSubmissionPage() {
+function NewSubmissionContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const duplicateId = searchParams.get("duplicate");
+
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<SubmissionFormData | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<ImageEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [loadingDuplicate, setLoadingDuplicate] = useState(!!duplicateId);
+
+  // Pre-fill form data when duplicating an existing submission
+  useEffect(() => {
+    if (!duplicateId || !user) return;
+
+    let cancelled = false;
+
+    async function fetchDuplicate() {
+      try {
+        const token = await user!.getIdToken();
+        const res = await fetch(`/api/submissions/${duplicateId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (cancelled) return;
+
+        if (json.success && json.data) {
+          const s = json.data;
+          setFormData({
+            productType: s.productType,
+            source: s.source,
+            serialNumber: s.serialNumber,
+            brandName: s.brandName,
+            fancifulName: s.fancifulName ?? "",
+            classTypeDesignation: s.classTypeDesignation,
+            alcoholContent: s.alcoholContent,
+            netContents: s.netContents,
+            nameAddressOnLabel: s.nameAddressOnLabel,
+            countryOfOrigin: s.countryOfOrigin ?? "",
+            grapeVarietals: s.grapeVarietals ?? "",
+            appellationOfOrigin: s.appellationOfOrigin ?? "",
+            vintageDate: s.vintageDate ?? "",
+            healthWarningConfirmed: s.healthWarningConfirmed,
+          });
+        }
+      } catch {
+        // Silently fail — user can still fill the form manually
+      } finally {
+        if (!cancelled) setLoadingDuplicate(false);
+      }
+    }
+
+    fetchDuplicate();
+    return () => { cancelled = true; };
+  }, [duplicateId, user]);
 
   const handleFormComplete = (data: SubmissionFormData) => {
     setFormData(data);
     setStep(1);
   };
 
-  const handleUploadComplete = (file: File) => {
-    setImageFile(file);
+  const handleUploadComplete = (files: ImageEntry[]) => {
+    setImageFiles(files);
     setStep(2);
   };
 
   const handleSubmit = async () => {
-    if (!user || !formData || !imageFile) return;
+    if (!user || !formData || imageFiles.length === 0) return;
     setSubmitting(true);
     setError("");
 
@@ -60,32 +111,43 @@ export default function NewSubmissionPage() {
 
       const submissionId = json.data.id;
 
-      // 2. Upload image to Firebase Storage
-      const imageId = crypto.randomUUID();
-      const { storagePath, downloadUrl } = await uploadImage(
-        submissionId,
-        imageId,
-        imageFile
-      );
+      // 2. Upload each image to Firebase Storage + create Firestore docs
+      for (const entry of imageFiles) {
+        const imageId = crypto.randomUUID();
+        const { storagePath, downloadUrl } = await uploadImage(
+          submissionId,
+          imageId,
+          entry.file
+        );
 
-      // 3. Create image document in Firestore so the Cloud Function can find it
-      await setDoc(doc(db, "submissions", submissionId, "images", imageId), {
-        imageType: "brand_front",
-        storagePath,
-        downloadUrl,
-        originalFilename: imageFile.name,
-        mimeType: imageFile.type,
-        fileSize: imageFile.size,
-        createdAt: serverTimestamp(),
-      });
+        await setDoc(doc(db, "submissions", submissionId, "images", imageId), {
+          imageType: entry.imageType,
+          storagePath,
+          downloadUrl,
+          originalFilename: entry.file.name,
+          mimeType: entry.file.type,
+          fileSize: entry.file.size,
+          createdAt: serverTimestamp(),
+        });
+      }
 
-      // 4. Navigate to the submission detail page
+      // 3. Navigate to the submission detail page
       router.push(`/submissions/${submissionId}`);
     } catch {
       setError("Failed to submit. Please try again.");
       setSubmitting(false);
     }
   };
+
+  if (loadingDuplicate) {
+    return (
+      <RequireProfile>
+        <div className="mx-auto max-w-4xl">
+          <LoadingState message="Loading submission data..." />
+        </div>
+      </RequireProfile>
+    );
+  }
 
   return (
     <RequireProfile>
@@ -131,6 +193,7 @@ export default function NewSubmissionPage() {
 
         {step === 0 && (
           <StepForm
+            key={formData ? "prefilled" : "empty"}
             defaultValues={formData ?? undefined}
             onNext={handleFormComplete}
           />
@@ -138,16 +201,16 @@ export default function NewSubmissionPage() {
 
         {step === 1 && (
           <StepUpload
-            defaultFile={imageFile}
+            defaultFiles={imageFiles}
             onNext={handleUploadComplete}
             onBack={() => setStep(0)}
           />
         )}
 
-        {step === 2 && formData && imageFile && (
+        {step === 2 && formData && imageFiles.length > 0 && (
           <StepReview
             formData={formData}
-            imageFile={imageFile}
+            imageFiles={imageFiles}
             submitting={submitting}
             onSubmit={handleSubmit}
             onBack={() => setStep(1)}
@@ -155,5 +218,13 @@ export default function NewSubmissionPage() {
         )}
       </div>
     </RequireProfile>
+  );
+}
+
+export default function NewSubmissionPage() {
+  return (
+    <Suspense fallback={<LoadingState message="Loading..." />}>
+      <NewSubmissionContent />
+    </Suspense>
   );
 }

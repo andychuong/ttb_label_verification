@@ -2,7 +2,6 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
-  deleteObject,
 } from "firebase/storage";
 import { storage } from "./client";
 
@@ -22,14 +21,4 @@ export async function uploadImage(
   const downloadUrl = await getDownloadURL(storageRef);
 
   return { storagePath, downloadUrl };
-}
-
-export async function getImageUrl(storagePath: string): Promise<string> {
-  const storageRef = ref(storage, storagePath);
-  return getDownloadURL(storageRef);
-}
-
-export async function deleteImage(storagePath: string): Promise<void> {
-  const storageRef = ref(storage, storagePath);
-  await deleteObject(storageRef);
 }

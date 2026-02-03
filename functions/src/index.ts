@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { getStorage } from "firebase-admin/storage";
 import { getAuth } from "firebase-admin/auth";
 import {
   onDocumentCreated,
@@ -48,11 +47,11 @@ interface ValidationResponse {
 
 // --- Helpers ---
 
-/** Retry with exponential backoff (2s, 4s, 8s) */
+/** Retry with exponential backoff (1s, 2s, 4s) */
 async function withRetry<T>(
   fn: () => Promise<T>,
   maxAttempts = 3,
-  baseDelayMs = 2000
+  baseDelayMs = 1000
 ): Promise<T> {
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -70,18 +69,6 @@ async function withRetry<T>(
     }
   }
   throw lastError;
-}
-
-/** Download image from Cloud Storage and return base64 + MIME type */
-async function fetchImageAsBase64(
-  storagePath: string
-): Promise<{ base64: string; mimeType: string }> {
-  const bucket = getStorage().bucket();
-  const file = bucket.file(storagePath);
-  const [buffer] = await file.download();
-  const [metadata] = await file.getMetadata();
-  const mimeType = (metadata.contentType as string) || "image/jpeg";
-  return { base64: buffer.toString("base64"), mimeType };
 }
 
 /** Extract form fields relevant to the GPT-4o prompt */
@@ -105,17 +92,16 @@ function buildFormData(
   };
 }
 
-/** Call GPT-4o Vision API for label validation */
+/** Call GPT-4o-mini Vision API for label validation */
 async function callGpt4oValidation(
   apiKey: string,
   formData: FormDataForPrompt,
-  imageBase64: string,
-  imageMimeType: string
+  imageUrl: string
 ): Promise<ValidationResponse> {
   const openai = new OpenAI({ apiKey });
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-4o-mini",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -125,21 +111,21 @@ async function callGpt4oValidation(
           {
             type: "image_url",
             image_url: {
-              url: `data:${imageMimeType};base64,${imageBase64}`,
-              detail: "high",
+              url: imageUrl,
+              detail: "auto",
             },
           },
         ],
       },
     ],
     response_format: { type: "json_object" },
-    max_tokens: 4000,
+    max_tokens: 2000,
     temperature: 0.1,
   });
 
   const content = response.choices[0]?.message?.content;
   if (!content) {
-    throw new Error("No response content from GPT-4o");
+    throw new Error("No response content from GPT-4o-mini");
   }
 
   const parsed = JSON.parse(content) as ValidationResponse;
@@ -188,7 +174,8 @@ function determineOutcome(result: ValidationResponse): {
 async function runValidation(
   submissionId: string,
   submissionData: FirebaseFirestore.DocumentData,
-  expectedVersion: number
+  expectedVersion: number,
+  imageUrl?: string
 ): Promise<void> {
   const docRef = db.collection("submissions").doc(submissionId);
 
@@ -196,71 +183,59 @@ async function runValidation(
     // Mark validation in progress
     await docRef.update({ validationInProgress: true });
 
-    // Poll for images (they may be uploaded shortly after document creation)
-    let imagesSnap: FirebaseFirestore.QuerySnapshot | null = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      imagesSnap = await docRef
+    // Resolve image URL
+    let resolvedImageUrl = imageUrl;
+
+    if (!resolvedImageUrl) {
+      // Called from onSubmissionUpdated — images already exist, read directly
+      const imagesSnap = await docRef
         .collection("images")
         .orderBy("createdAt", "desc")
-        .limit(5)
+        .limit(1)
         .get();
-      if (!imagesSnap.empty) break;
+
+      if (imagesSnap.empty) {
+        console.warn(`No images found for submission ${submissionId}`);
+        await docRef.update({
+          validationInProgress: false,
+          needsAttention: true,
+        });
+        await docRef.collection("validationResults").add({
+          extractedText: "",
+          fieldResults: [],
+          complianceWarnings: [
+            {
+              check: "image_present",
+              message:
+                "No label image was found for this submission. Upload an image and resubmit.",
+              severity: "error",
+            },
+          ],
+          overallPass: false,
+          confidence: "low",
+          rawAiResponse: {},
+          processedAt: FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      resolvedImageUrl = imagesSnap.docs[0].data().downloadUrl as string;
     }
 
-    if (!imagesSnap || imagesSnap.empty) {
-      console.warn(`No images found for submission ${submissionId}`);
-      await docRef.update({
-        validationInProgress: false,
-        needsAttention: true,
-      });
-      await docRef.collection("validationResults").add({
-        extractedText: "",
-        fieldResults: [],
-        complianceWarnings: [
-          {
-            check: "image_present",
-            message:
-              "No label image was found for this submission. Upload an image and resubmit.",
-            severity: "error",
-          },
-        ],
-        overallPass: false,
-        confidence: "low",
-        rawAiResponse: {},
-        processedAt: FieldValue.serverTimestamp(),
-        createdAt: FieldValue.serverTimestamp(),
-      });
-      return;
-    }
-
-    // Use the first (most recent) image as the primary label
-    const imageDoc = imagesSnap.docs[0];
-    const imageData = imageDoc.data();
-    const storagePath = imageData.storagePath as string;
-
-    if (!storagePath) {
-      throw new Error("Image document missing storagePath");
-    }
-
-    // Download image from Cloud Storage
-    const { base64, mimeType } = await fetchImageAsBase64(storagePath);
-
-    // Validate image size (reject >20MB)
-    const imageSizeBytes = Buffer.from(base64, "base64").length;
-    if (imageSizeBytes > 20 * 1024 * 1024) {
-      throw new Error("Image file exceeds 20MB limit");
+    if (!resolvedImageUrl) {
+      throw new Error("Image document missing downloadUrl");
     }
 
     // Build form data for the prompt
     const formData = buildFormData(submissionData);
 
-    // Call GPT-4o with retry (3 attempts, exponential backoff)
+    // Call GPT-4o-mini with retry (3 attempts, exponential backoff)
     const apiKey = openaiApiKey.value();
     const result = await withRetry(
-      () => callGpt4oValidation(apiKey, formData, base64, mimeType),
+      () => callGpt4oValidation(apiKey, formData, resolvedImageUrl!),
       3,
-      2000
+      1000
     );
 
     // Version check — discard results if submission was modified during validation
@@ -282,25 +257,25 @@ async function runValidation(
     // Determine outcome
     const outcome = determineOutcome(result);
 
-    // Write validation results to subcollection
-    await docRef.collection("validationResults").add({
-      extractedText: result.extractedText,
-      fieldResults: result.fieldResults,
-      complianceWarnings: result.complianceWarnings,
-      overallPass: result.overallPass,
-      confidence: result.confidence,
-      rawAiResponse: result as unknown as Record<string, unknown>,
-      processedAt: FieldValue.serverTimestamp(),
-      createdAt: FieldValue.serverTimestamp(),
-    });
-
-    // Update submission status
-    await docRef.update({
-      status: outcome.status,
-      needsAttention: outcome.needsAttention,
-      validationInProgress: false,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
+    // Write validation results + update submission status in parallel
+    await Promise.all([
+      docRef.collection("validationResults").add({
+        extractedText: result.extractedText,
+        fieldResults: result.fieldResults,
+        complianceWarnings: result.complianceWarnings,
+        overallPass: result.overallPass,
+        confidence: result.confidence,
+        rawAiResponse: result as unknown as Record<string, unknown>,
+        processedAt: FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
+      }),
+      docRef.update({
+        status: outcome.status,
+        needsAttention: outcome.needsAttention,
+        validationInProgress: false,
+        updatedAt: FieldValue.serverTimestamp(),
+      }),
+    ]);
 
     console.log(
       `Validation complete for ${submissionId}: ` +
@@ -349,31 +324,60 @@ async function runValidation(
 // --- Cloud Functions ---
 
 /**
- * onSubmissionCreated
+ * onImageCreated
  *
- * Firestore onCreate trigger on submissions/{id}.
- * Starts the AI validation pipeline when a new submission is created.
- * Polls briefly for images since they're uploaded after document creation.
+ * Firestore onCreate trigger on submissions/{submissionId}/images/{imageId}.
+ * Starts AI validation immediately when an image is uploaded.
+ * Deduplication: if validationInProgress is already true (e.g., second image
+ * uploaded while first is being processed), this trigger exits early.
  */
-export const onSubmissionCreated = onDocumentCreated(
+export const onImageCreated = onDocumentCreated(
   {
-    document: "submissions/{id}",
+    document: "submissions/{submissionId}/images/{imageId}",
     secrets: [openaiApiKey],
     timeoutSeconds: 300,
-    memory: "512MiB",
+    memory: "256MiB",
   },
   async (event) => {
     const snapshot = event.data;
     if (!snapshot) return;
 
-    const submissionId = event.params.id;
-    const data = snapshot.data();
-    const version = data.version || 1;
+    const submissionId = event.params.submissionId;
+    const imageData = snapshot.data();
+    const imageUrl = imageData.downloadUrl as string;
+
+    if (!imageUrl) {
+      console.warn(
+        `Image doc missing downloadUrl for submission ${submissionId}`
+      );
+      return;
+    }
+
+    // Read parent submission
+    const docRef = db.collection("submissions").doc(submissionId);
+    const submissionDoc = await docRef.get();
+
+    if (!submissionDoc.exists) {
+      console.warn(`Parent submission ${submissionId} not found`);
+      return;
+    }
+
+    const submissionData = submissionDoc.data()!;
+
+    // Deduplication: skip if validation is already running
+    if (submissionData.validationInProgress) {
+      console.log(
+        `Validation already in progress for ${submissionId}, skipping`
+      );
+      return;
+    }
+
+    const version = submissionData.version || 1;
 
     console.log(
-      `New submission created: ${submissionId} (version ${version})`
+      `Image uploaded for submission ${submissionId} (version ${version}), starting validation`
     );
-    await runValidation(submissionId, data, version);
+    await runValidation(submissionId, submissionData, version, imageUrl);
   }
 );
 
@@ -392,7 +396,7 @@ export const onSubmissionUpdated = onDocumentUpdated(
     document: "submissions/{id}",
     secrets: [openaiApiKey],
     timeoutSeconds: 300,
-    memory: "512MiB",
+    memory: "256MiB",
   },
   async (event) => {
     const before = event.data?.before?.data();

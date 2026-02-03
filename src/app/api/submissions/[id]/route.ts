@@ -158,13 +158,13 @@ export async function PUT(
         };
       }
 
-      // Must be pending
-      if (current.status !== "pending") {
+      // Must be pending or needs_revision
+      if (current.status !== "pending" && current.status !== "needs_revision") {
         return {
           error: errorResponse(
             400,
             "INVALID_STATUS",
-            "Only pending submissions can be edited"
+            "Only pending or needs_revision submissions can be edited"
           ),
         };
       }
@@ -203,7 +203,7 @@ export async function PUT(
       });
 
       // Update submission
-      tx.update(docRef, {
+      const updateData: Record<string, unknown> = {
         ...parsed.data,
         countryOfOrigin: parsed.data.countryOfOrigin || null,
         fancifulName: parsed.data.fancifulName || null,
@@ -212,7 +212,14 @@ export async function PUT(
         vintageDate: parsed.data.vintageDate || null,
         version: newVersion,
         updatedAt: FieldValue.serverTimestamp(),
-      });
+      };
+
+      // If needs_revision, change to pending (triggers revalidation)
+      if (current.status === "needs_revision") {
+        updateData.status = "pending";
+      }
+
+      tx.update(docRef, updateData);
 
       return { success: true, version: newVersion };
     });

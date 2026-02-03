@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SubmissionFormData } from "@/lib/validation/formSchemas";
+import type { ImageEntry, ImageType } from "@/types/submission";
 import { Button } from "@/components/ui";
 
 const productTypeLabels: Record<string, string> = {
@@ -9,9 +11,15 @@ const productTypeLabels: Record<string, string> = {
   malt_beverage: "Malt Beverage",
 };
 
+const imageTypeLabels: Record<ImageType, string> = {
+  brand_front: "Front Label",
+  back: "Back Label",
+  other: "Other",
+};
+
 interface StepReviewProps {
   formData: SubmissionFormData;
-  imageFile: File;
+  imageFiles: ImageEntry[];
   submitting: boolean;
   onSubmit: () => void;
   onBack: () => void;
@@ -29,12 +37,20 @@ function Field({ label, value }: { label: string; value: string | undefined | nu
 
 export default function StepReview({
   formData,
-  imageFile,
+  imageFiles,
   submitting,
   onSubmit,
   onBack,
 }: StepReviewProps) {
-  const previewUrl = URL.createObjectURL(imageFile);
+  const previewUrls = useMemo(
+    () => imageFiles.map((entry) => ({
+      url: URL.createObjectURL(entry.file),
+      imageType: entry.imageType,
+      name: entry.file.name,
+      size: entry.file.size,
+    })),
+    [imageFiles]
+  );
 
   return (
     <div className="space-y-6 rounded-lg bg-white p-8 shadow">
@@ -113,26 +129,34 @@ export default function StepReview({
         </p>
       </div>
 
-      {/* Image preview */}
+      {/* Image previews */}
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-          Label Image
+          Label Images
         </h3>
-        <div className="flex items-center gap-4 rounded-md border border-gray-200 p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={previewUrl}
-            alt="Label preview"
-            className="h-24 w-24 rounded object-cover"
-          />
-          <div>
-            <p className="text-sm font-medium text-gray-900">
-              {imageFile.name}
-            </p>
-            <p className="text-xs text-gray-500">
-              {(imageFile.size / 1024 / 1024).toFixed(2)} MB
-            </p>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {previewUrls.map((preview) => (
+            <div
+              key={preview.imageType}
+              className="rounded-md border border-gray-200 p-3"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview.url}
+                alt={`${imageTypeLabels[preview.imageType]} preview`}
+                className="mb-2 h-32 w-full rounded object-cover"
+              />
+              <p className="text-xs font-medium text-gray-500">
+                {imageTypeLabels[preview.imageType]}
+              </p>
+              <p className="truncate text-sm font-medium text-gray-900">
+                {preview.name}
+              </p>
+              <p className="text-xs text-gray-500">
+                {(preview.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 

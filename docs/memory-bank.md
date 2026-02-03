@@ -500,6 +500,7 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 9: AI Validation Pipeline** | ✅ Complete | Feb 2, 2026 |
 | **Phase 10: Admin Portal** | ✅ Complete | Feb 2, 2026 |
 | **Phase 11: Firestore Security Rules & Indexes** | ✅ Complete | Feb 3, 2026 |
+| **Phase 13: v1.1 — Polish & Stability** | ✅ Complete | Feb 3, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -608,6 +609,47 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `storage.rules` — Authenticated users can upload images (image/*, <10 MB) and read images
 - `.firebaserc` — Created with default project `label-validation-449b0`
 - All rules compiled and deployed successfully via `firebase deploy --only firestore:rules,firestore:indexes,storage`
+
+### Phase 13 Notes (Feb 3, 2026)
+
+Phase 12 (Deployment) was skipped for now. Phase 13 audit found 6 of 9 tasks already complete from earlier phases:
+
+- 13.2 (Edit pending): Built in Phase 6/8 with `validationInProgress` lock + optimistic locking
+- 13.3 (Resubmission): Built in Phase 6/8 with resubmit API + version increment
+- 13.5 (Real-time onSnapshot): Built in Phase 7/8/10 with `useSubmissions`, `useSubmission`, `useAdminQueue` hooks
+- 13.6 (Race conditions): Built in Phase 6/9 with version checks in Cloud Functions + 409/423 HTTP responses
+- 13.8 (Forgot password): Built in Phase 2 with `sendPasswordResetEmail`
+- 13.9 (Status/product filtering): Built in Phase 7/10 with dropdown filters on both dashboards
+
+Three tasks were implemented in this session:
+
+**13.1 Multi-Image Upload:**
+
+- Added `ImageEntry` interface to `src/types/submission.ts` for client-side image management (`{ file: File, imageType: ImageType }`)
+- Created `src/components/submission/MultiImageUploader.tsx` — composes 3 instances of existing `ImageUploader` for front (required), back (optional), other (optional) label slots
+- Updated `step-upload.tsx` — props changed from `defaultFile/onNext(File)` to `defaultFiles/onNext(ImageEntry[])`, validates front label required
+- Updated `step-review.tsx` — shows grid of image previews with type labels, filename, and size for each uploaded image
+- Updated orchestrator `page.tsx` — state changed from `imageFile: File | null` to `imageFiles: ImageEntry[]`, handleSubmit loops over entries uploading each with its `imageType`
+- Updated `edit/page.tsx` — shows ALL existing images in a grid (not just `images[0]`), uses `MultiImageUploader` for new images, upload loop in handleSave
+- Cloud Functions unchanged — already queries up to 5 images and uses the first one
+
+**13.4 Duplicate & Edit Pre-fill:**
+
+- Updated orchestrator `page.tsx` — reads `?duplicate=ID` via `useSearchParams()`, fetches GET `/api/submissions/{id}`, maps response to `SubmissionFormData` and sets form state
+- Wrapped in `<Suspense>` boundary (required by Next.js App Router for `useSearchParams`)
+- Extracted `NewSubmissionContent` inner component for Suspense compatibility
+- Uses `key` prop on `StepForm` (`"prefilled"` vs `"empty"`) to force re-mount when defaultValues arrive
+- `loadingDuplicate` state shows `LoadingState` while fetching
+- Images are NOT duplicated — user must upload new ones
+- Only `page.tsx` changed; `StepForm` already had `defaultValues` prop support
+
+**13.7 Client-Side Pagination:**
+
+- Created `src/lib/hooks/usePagination.ts` — generic `usePagination<T>(items, pageSize)` hook with `useMemo`/`useCallback`, auto-clamps page when items shrink
+- Created `src/components/ui/Pagination.tsx` — shows "Showing X-Y of Z" + page buttons with ellipsis. Hidden when `totalPages <= 1`
+- User dashboard: `usePagination(filtered, 10)` — 10 items per page, resets to page 1 on filter changes
+- Admin dashboard: `usePagination(filtered, 15)` — 15 items per page, resets on tab/filter changes
+- Real-time `onSnapshot` preserved — pagination is client-side over already-loaded data
 
 ### Key Dependency Versions
 | Package | Version |

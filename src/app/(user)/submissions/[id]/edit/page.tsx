@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth/context";
 import { db } from "@/lib/firebase/client";
 import { uploadImage } from "@/lib/firebase/storage";
 import { useSubmission } from "@/lib/hooks/useSubmission";
-import { ImageUploader } from "@/components/submission/ImageUploader";
+import { MultiImageUploader } from "@/components/submission/MultiImageUploader";
 import StepForm from "../../new/step-form";
 import {
   Button,
@@ -18,6 +18,13 @@ import {
   Spinner,
 } from "@/components/ui";
 import type { SubmissionFormData } from "@/lib/validation/formSchemas";
+import type { ImageEntry, ImageType } from "@/types/submission";
+
+const imageTypeLabels: Record<ImageType, string> = {
+  brand_front: "Front Label",
+  back: "Back Label",
+  other: "Other",
+};
 
 export default function EditSubmissionPage({
   params,
@@ -29,7 +36,7 @@ export default function EditSubmissionPage({
   const { user } = useAuth();
   const { submission, images, loading, error } = useSubmission(id);
 
-  const [newImage, setNewImage] = useState<File | null>(null);
+  const [newImages, setNewImages] = useState<ImageEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -58,22 +65,22 @@ export default function EditSubmissionPage({
         return;
       }
 
-      // 2. If a new image was uploaded, upload it to Storage + create Firestore doc
-      if (newImage) {
+      // 2. Upload any new images to Storage + create Firestore docs
+      for (const entry of newImages) {
         const imageId = crypto.randomUUID();
         const { storagePath, downloadUrl } = await uploadImage(
           id,
           imageId,
-          newImage
+          entry.file
         );
 
         await setDoc(doc(db, "submissions", id, "images", imageId), {
-          imageType: "brand_front",
+          imageType: entry.imageType,
           storagePath,
           downloadUrl,
-          originalFilename: newImage.name,
-          mimeType: newImage.type,
-          fileSize: newImage.size,
+          originalFilename: entry.file.name,
+          mimeType: entry.file.type,
+          fileSize: entry.file.size,
           createdAt: serverTimestamp(),
         });
       }
@@ -105,15 +112,20 @@ export default function EditSubmissionPage({
       }
     : undefined;
 
-  // Guard: can only edit pending submissions that aren't being validated
+  // Guard: can edit pending or needs_revision submissions (not while validating)
   const canEdit =
-    submission?.status === "pending" && !submission?.validationInProgress;
+    (submission?.status === "pending" ||
+      submission?.status === "needs_revision") &&
+    !submission?.validationInProgress;
+  const isRevision = submission?.status === "needs_revision";
 
   return (
     <RequireProfile>
       <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Edit Submission</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isRevision ? "Revise & Resubmit" : "Edit Submission"}
+          </h1>
           <Button
             variant="secondary"
             onClick={() => router.push(`/submissions/${id}`)}
@@ -134,7 +146,7 @@ export default function EditSubmissionPage({
           <div className="rounded-md bg-yellow-50 p-4 text-sm text-yellow-700">
             {submission.validationInProgress
               ? "This submission is currently being validated and cannot be edited."
-              : "Only pending submissions can be edited."}
+              : "Only pending or needs revision submissions can be edited."}
           </div>
         )}
 
@@ -153,30 +165,42 @@ export default function EditSubmissionPage({
               </div>
             )}
 
-            {/* Current Image + Replace */}
-            <Card>
-              <CardHeader title="Label Image" />
-              {images.length > 0 && !newImage && (
-                <div className="mb-4">
-                  <p className="mb-2 text-sm text-gray-500">Current image:</p>
-                  <div className="overflow-hidden rounded-md border border-gray-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={images[0].downloadUrl}
-                      alt={images[0].originalFilename}
-                      className="h-48 w-full object-contain bg-gray-50"
-                    />
-                  </div>
+            {/* Current Images */}
+            {images.length > 0 && (
+              <Card>
+                <CardHeader title="Current Images" />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {images.map((img) => (
+                    <div
+                      key={img.storagePath}
+                      className="rounded-md border border-gray-200 p-3"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.downloadUrl}
+                        alt={img.originalFilename}
+                        className="mb-2 h-32 w-full rounded object-cover bg-gray-50"
+                      />
+                      <p className="text-xs font-medium text-gray-500">
+                        {imageTypeLabels[img.imageType] ?? img.imageType}
+                      </p>
+                      <p className="truncate text-sm text-gray-900">
+                        {img.originalFilename}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              )}
-              <ImageUploader
-                value={newImage}
-                onChange={setNewImage}
-                error=""
-              />
-              {!newImage && images.length > 0 && (
-                <p className="mt-2 text-xs text-gray-400">
-                  Leave empty to keep the current image.
+              </Card>
+            )}
+
+            {/* Upload New / Replacement Images */}
+            <Card>
+              <CardHeader title="Upload New Images" />
+              <MultiImageUploader value={newImages} onChange={setNewImages} />
+              {newImages.length === 0 && images.length > 0 && (
+                <p className="mt-3 text-xs text-gray-400">
+                  Leave empty to keep the current images. New images of the same
+                  type will be added alongside existing ones.
                 </p>
               )}
             </Card>
@@ -185,7 +209,7 @@ export default function EditSubmissionPage({
             <StepForm
               defaultValues={defaultValues}
               onNext={handleSave}
-              submitLabel="Save Changes"
+              submitLabel={isRevision ? "Resubmit" : "Save Changes"}
             />
           </>
         )}

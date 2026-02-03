@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RequireProfile } from "@/lib/auth/guards";
@@ -8,7 +8,8 @@ import {
   useSubmissions,
   type SubmissionListItem,
 } from "@/lib/hooks/useSubmissions";
-import { Card, StatusBadge, Button, LoadingState } from "@/components/ui";
+import { Card, StatusBadge, Button, LoadingState, Pagination } from "@/components/ui";
+import { usePagination } from "@/lib/hooks/usePagination";
 import type { SubmissionStatus, ProductType } from "@/types/submission";
 
 const productTypeLabels: Record<ProductType, string> = {
@@ -104,6 +105,24 @@ export default function DashboardPage() {
       return sortDir === "asc" ? aTime - bTime : bTime - aTime;
     });
   }, [submissions, statusFilter, productFilter, sortKey, sortDir]);
+
+  const {
+    pageItems,
+    page,
+    totalPages,
+    totalItems,
+    pageSize,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(filtered, 10);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    goToPage(1);
+  }, [statusFilter, productFilter, goToPage]);
 
   const toggleSort = (key: "createdAt" | "status") => {
     if (sortKey === key) {
@@ -202,7 +221,7 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {filtered.map((sub) => (
+                    {pageItems.map((sub) => (
                       <tr
                         key={sub.id}
                         className="cursor-pointer hover:bg-gray-50"
@@ -230,6 +249,17 @@ export default function DashboardPage() {
                     ))}
                   </tbody>
                 </table>
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  hasNextPage={hasNextPage}
+                  hasPrevPage={hasPrevPage}
+                  onNextPage={nextPage}
+                  onPrevPage={prevPage}
+                  onGoToPage={goToPage}
+                />
               </div>
             )}
           </>

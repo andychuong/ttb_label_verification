@@ -274,17 +274,17 @@
 
 ---
 
-## Phase 13: v1.1 — Polish & Stability (Post-MVP)
+## Phase 13: v1.1 — Polish & Stability (Post-MVP) ✅
 
-- [ ] **13.1** Multi-image upload (front, back, other) with image type tagging
-- [ ] **13.2** Edit pending submission flow (with validationInProgress lock check and optimistic locking)
-- [ ] **13.3** Resubmission flow ("Revise & Resubmit" button, pre-fill form, version history)
-- [ ] **13.4** Duplicate & Edit flow (create new submission from rejected one)
-- [ ] **13.5** Real-time Firestore `onSnapshot` listeners on dashboards and detail pages
-- [ ] **13.6** Race condition handling (Cloud Function version check, 409/423 responses)
-- [ ] **13.7** Cursor-based pagination on both dashboards
-- [ ] **13.8** Forgot password flow (Firebase `sendPasswordResetEmail`)
-- [ ] **13.9** Status and product type filtering on dashboards
+- [x] **13.1** Multi-image upload (front, back, other) with image type tagging
+- [x] **13.2** Edit pending submission flow (with validationInProgress lock check and optimistic locking)
+- [x] **13.3** Resubmission flow ("Revise & Resubmit" button, pre-fill form, version history)
+- [x] **13.4** Duplicate & Edit flow (create new submission from rejected one)
+- [x] **13.5** Real-time Firestore `onSnapshot` listeners on dashboards and detail pages
+- [x] **13.6** Race condition handling (Cloud Function version check, 409/423 responses)
+- [x] **13.7** Client-side pagination on both dashboards
+- [x] **13.8** Forgot password flow (Firebase `sendPasswordResetEmail`)
+- [x] **13.9** Status and product type filtering on dashboards
 
 ---
 

@@ -142,6 +142,7 @@ export default function AdminSubmissionDetailPage({
             <ValidationResultsPanel
               result={latestValidation}
               validationInProgress={submission.validationInProgress}
+              showConfidence
             />
           )}
 

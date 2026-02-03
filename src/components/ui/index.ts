@@ -6,7 +6,6 @@ export { RadioGroup } from "./RadioGroup";
 export { Textarea } from "./Textarea";
 export { Card, CardHeader } from "./Card";
 export { StatusBadge } from "./StatusBadge";
-export { Table } from "./Table";
 export { Modal } from "./Modal";
-export { ToastProvider, useToast } from "./Toast";
 export { Spinner, LoadingState } from "./Spinner";
+export { Pagination } from "./Pagination";

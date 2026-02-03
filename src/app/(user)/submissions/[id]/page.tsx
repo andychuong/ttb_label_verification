@@ -4,7 +4,6 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RequireProfile } from "@/lib/auth/guards";
-import { useAuth } from "@/lib/auth/context";
 import { useSubmission } from "@/lib/hooks/useSubmission";
 import { ValidationResultsPanel } from "@/components/submission/ValidationResultsPanel";
 import {
@@ -61,7 +60,6 @@ export default function SubmissionDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user } = useAuth();
   const { submission, images, validationResults, reviews, loading, error } =
     useSubmission(id);
 
@@ -116,29 +114,9 @@ export default function SubmissionDetailPage({
                     </Link>
                   )}
                 {submission.status === "needs_revision" && (
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const token = await user?.getIdToken();
-                        const res = await fetch(
-                          `/api/submissions/${id}/resubmit`,
-                          {
-                            method: "POST",
-                            headers: {
-                              Authorization: `Bearer ${token}`,
-                            },
-                          }
-                        );
-                        if (res.ok) {
-                          // Submission re-triggers validation via Cloud Function
-                        }
-                      } catch {
-                        // Error handled by real-time listener
-                      }
-                    }}
-                  >
-                    Revise &amp; Resubmit
-                  </Button>
+                  <Link href={`/submissions/${id}/edit`}>
+                    <Button>Revise &amp; Resubmit</Button>
+                  </Link>
                 )}
                 <Link href={`/submissions/new?duplicate=${id}`}>
                   <Button variant="secondary">Duplicate &amp; Edit</Button>
@@ -200,37 +178,6 @@ export default function SubmissionDetailPage({
                 result={latestValidation}
                 validationInProgress={submission.validationInProgress}
               />
-            )}
-
-            {/* Label Images */}
-            {images.length > 0 && (
-              <Card>
-                <CardHeader title="Label Images" />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {images.map((img) => (
-                    <div
-                      key={img.id}
-                      className="overflow-hidden rounded-md border border-gray-200"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={img.downloadUrl}
-                        alt={img.originalFilename}
-                        className="h-64 w-full object-contain bg-gray-50"
-                      />
-                      <div className="border-t border-gray-200 bg-white px-3 py-2">
-                        <p className="truncate text-xs text-gray-600">
-                          {img.originalFilename}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {img.imageType} &middot;{" "}
-                          {(img.fileSize / 1024).toFixed(0)} KB
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
             )}
 
             {/* Form Data */}
@@ -302,6 +249,37 @@ export default function SubmissionDetailPage({
                 />
               </dl>
             </Card>
+
+            {/* Label Images */}
+            {images.length > 0 && (
+              <Card>
+                <CardHeader title="Label Images" />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {images.map((img) => (
+                    <div
+                      key={img.id}
+                      className="overflow-hidden rounded-md border border-gray-200"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.downloadUrl}
+                        alt={img.originalFilename}
+                        className="h-64 w-full object-contain bg-gray-50"
+                      />
+                      <div className="border-t border-gray-200 bg-white px-3 py-2">
+                        <p className="truncate text-xs text-gray-600">
+                          {img.originalFilename}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {img.imageType} &middot;{" "}
+                          {(img.fileSize / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
 
             {/* Review History */}
             {reviews.length > 0 && (

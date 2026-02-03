@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useAdminSubmissions,
   useNeedsAttentionQueue,
   type AdminSubmissionItem,
 } from "@/lib/hooks/useAdminQueue";
-import { Card, StatusBadge, LoadingState } from "@/components/ui";
+import { Card, StatusBadge, LoadingState, Pagination } from "@/components/ui";
+import { usePagination } from "@/lib/hooks/usePagination";
 import type { SubmissionStatus, ProductType } from "@/types/submission";
 
 const productTypeLabels: Record<ProductType, string> = {
@@ -139,6 +140,24 @@ export default function AdminDashboardPage() {
     });
   }, [activeList, statusFilter, productFilter, sortKey, sortDir]);
 
+  const {
+    pageItems,
+    page,
+    totalPages,
+    totalItems,
+    pageSize,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(filtered, 15);
+
+  // Reset to page 1 when tab or filters change
+  useEffect(() => {
+    goToPage(1);
+  }, [tab, statusFilter, productFilter, goToPage]);
+
   const toggleSort = (key: "createdAt" | "status") => {
     if (sortKey === key) {
       setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -264,7 +283,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filtered.map((sub) => (
+                  {pageItems.map((sub) => (
                     <tr
                       key={sub.id}
                       className="cursor-pointer hover:bg-gray-50"
@@ -307,6 +326,17 @@ export default function AdminDashboardPage() {
                   ))}
                 </tbody>
               </table>
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  hasNextPage={hasNextPage}
+                  hasPrevPage={hasPrevPage}
+                  onNextPage={nextPage}
+                  onPrevPage={prevPage}
+                  onGoToPage={goToPage}
+                />
             </div>
           )}
         </>

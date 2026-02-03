@@ -10,7 +10,6 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/submissions/new", label: "New Submission" },
   { href: "/profile", label: "Profile" },
-  { href: "/settings", label: "Settings" },
 ];
 
 function Sidebar() {

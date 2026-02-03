@@ -35,6 +35,12 @@ export interface Submission {
 
 export type ImageType = "brand_front" | "back" | "other";
 
+/** Client-side image entry before upload */
+export interface ImageEntry {
+  file: File;
+  imageType: ImageType;
+}
+
 export interface SubmissionImage {
   imageType: ImageType;
   storagePath: string;

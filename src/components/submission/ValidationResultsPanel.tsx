@@ -29,7 +29,7 @@ const confidenceConfig: Record<
   Confidence,
   { label: string; classes: string }
 > = {
-  high: { label: "High Confidence", classes: "text-green-700 bg-green-50" },
+  high: { label: "High Confidence", classes: "text-gray-600 bg-gray-100" },
   medium: {
     label: "Medium Confidence",
     classes: "text-yellow-700 bg-yellow-50",
@@ -40,11 +40,13 @@ const confidenceConfig: Record<
 interface ValidationResultsPanelProps {
   result: ValidationResultDoc;
   validationInProgress: boolean;
+  showConfidence?: boolean;
 }
 
 export function ValidationResultsPanel({
   result,
   validationInProgress,
+  showConfidence = false,
 }: ValidationResultsPanelProps) {
   const confidence = confidenceConfig[result.confidence];
 
@@ -70,11 +72,13 @@ export function ValidationResultsPanel({
         }
         action={
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${confidence.classes}`}
-            >
-              {confidence.label}
-            </span>
+            {showConfidence && (
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${confidence.classes}`}
+              >
+                {confidence.label}
+              </span>
+            )}
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 result.overallPass
