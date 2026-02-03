@@ -82,58 +82,55 @@
 
 ---
 
-## Phase 4: Layout & Navigation
+## Phase 4: Layout & Navigation ✅
 
-- [ ] **4.1** Create `src/app/(user)/layout.tsx` — Authenticated user shell:
-  - Sidebar with nav links: Dashboard, New Submission, Profile/Settings
-  - Header with user name, company, and logout button
+- [x] **4.1** Create `src/app/(user)/layout.tsx` — Authenticated user shell:
+  - Sidebar with nav links: Dashboard, New Submission, Profile, Settings
+  - Header with user email and sign out button
+  - Mobile-responsive nav bar for small screens
   - Wraps children with `RequireAuth` and `RequireProfile` guards
-- [ ] **4.2** Create `src/app/(admin)/layout.tsx` — Admin shell:
+- [x] **4.2** Create `src/app/(admin)/layout.tsx` — Admin shell:
   - Sidebar with nav links: Admin Dashboard
-  - Header with admin indicator and logout
+  - Header with purple Admin badge, email, and sign out
   - Wraps children with `RequireAuth` and `RequireAdmin` guards
-- [ ] **4.3** Create shared UI components in `src/components/ui/`:
+- [x] **4.3** Create shared UI components in `src/components/ui/`:
   - `Button.tsx` (primary, secondary, danger, ghost variants)
   - `Input.tsx` (text input with label, error message, helper text)
-  - `Select.tsx` (dropdown)
+  - `Select.tsx` (dropdown with placeholder)
   - `Checkbox.tsx`
   - `RadioGroup.tsx`
   - `Textarea.tsx`
-  - `Card.tsx`
-  - `Badge.tsx` / `StatusBadge.tsx` (Pending, Approved, Needs Revision, Rejected)
-  - `Table.tsx` (sortable columns, clickable rows)
-  - `Modal.tsx` (confirmation dialogs)
-  - `Toast.tsx` (notification toasts)
-  - `Spinner.tsx` / `LoadingState.tsx`
+  - `Card.tsx` + `CardHeader.tsx`
+  - `StatusBadge.tsx` (Pending, Approved, Needs Revision, Rejected)
+  - `Table.tsx` (generic, sortable columns, clickable rows)
+  - `Modal.tsx` (confirmation dialogs with Escape + overlay dismiss)
+  - `Toast.tsx` (ToastProvider + useToast hook, auto-dismiss)
+  - `Spinner.tsx` + `LoadingState.tsx`
+  - `index.ts` barrel export
 
 ---
 
-## Phase 5: Submission Form (Multi-Step)
+## Phase 5: Submission Form (Multi-Step) ✅
 
-- [ ] **5.1** Create `src/app/(user)/submissions/new/page.tsx` — Multi-step form orchestrator (manages step state, step navigation)
-- [ ] **5.2** Create `src/app/(user)/submissions/new/step-form.tsx` — Step 1: Application Form
+- [x] **5.1** Create `src/app/(user)/submissions/new/page.tsx` — Multi-step form orchestrator (manages step state, step navigation, submits to API + uploads image)
+- [x] **5.2** Create `src/app/(user)/submissions/new/step-form.tsx` — Step 1: Application Form
   - Product type dropdown (Wine, Distilled Spirits, Malt Beverage) controlling conditional field visibility
-  - All common fields: Serial Number, Source (Domestic/Imported), Brand Name, Fanciful Name, Alcohol Content, Net Contents, Name & Address, Application Type checkboxes, Formula Number, Container Info
+  - All common fields: Serial Number, Source, Brand Name, Fanciful Name, Alcohol Content, Net Contents, Name & Address, Application Type checkboxes, Formula Number, Container Info
   - Distilled spirits fields: Class/Type, Statement of Composition, Age Statement, Country of Origin (if imported), State of Distillation, Commodity Statement, Coloring Materials, FD&C Yellow #5, Cochineal/Carmine, Sulfite Declaration
-  - Wine fields (v1.1): Class/Type, Grape Varietal(s), Appellation of Origin, Vintage Date, Country of Origin (if imported), Sulfite Declaration, FD&C Yellow #5, Cochineal/Carmine, Foreign Wine Percentage
-  - Malt beverage fields (v1.1): Class/Type, Country of Origin (if imported)
+  - Wine fields: Class/Type, Grape Varietal(s), Appellation of Origin, Vintage Date, Country of Origin (if imported), Sulfite Declaration, FD&C Yellow #5, Cochineal/Carmine, Foreign Wine Percentage
+  - Malt beverage fields: Class/Type, Country of Origin (if imported)
   - Health Warning confirmation checkbox
   - Conditional field rendering based on Product Type and Source
   - Resubmission TTB ID field (conditional on Application Type selection)
   - React Hook Form + Zod validation
-- [ ] **5.3** Create `src/app/(user)/submissions/new/step-upload.tsx` — Step 2: Image Upload
-  - Drag-and-drop zone + file picker button
-  - Client-side validation: JPEG, PNG, WebP, TIFF; max 10 MB per image
-  - Image preview thumbnails
-  - v1.0: Single image upload; v1.1: Multi-image with type tagging (front, back, other)
-  - Optional notes textarea
-  - Upload directly to Firebase Storage at `submissions/{submissionId}/images/{imageId}`
-- [ ] **5.4** Create `src/app/(user)/submissions/new/step-review.tsx` — Step 3: Review & Submit
+- [x] **5.3** Create `src/app/(user)/submissions/new/step-upload.tsx` — Step 2: Image Upload
+  - Uses reusable ImageUploader component
+  - v1.0: Single image upload
+- [x] **5.4** Create `src/app/(user)/submissions/new/step-review.tsx` — Step 3: Review & Submit
   - Read-only summary of all form data (two-column layout)
-  - Image thumbnail(s)
-  - Confirm & Submit button
-  - On submit: call `POST /api/submissions`
-- [ ] **5.5** Create `src/components/submission/ImageUploader.tsx` — Reusable image upload component with drag-and-drop, validation, preview
+  - Image thumbnail preview
+  - Confirm & Submit button → POST /api/submissions + upload to Storage
+- [x] **5.5** Create `src/components/submission/ImageUploader.tsx` — Reusable image upload component with drag-and-drop, file picker, validation, preview, remove
 
 ---
 

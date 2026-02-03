@@ -510,6 +510,8 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 1: Firebase Config & Shared Utilities** | ✅ Complete | Feb 2, 2026 |
 | **Phase 2: Authentication** | ✅ Complete | Feb 2, 2026 |
 | **Phase 3: User Profile** | ✅ Complete | Feb 2, 2026 |
+| **Phase 4: Layout & Navigation** | ✅ Complete | Feb 2, 2026 |
+| **Phase 5: Submission Form** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -542,6 +544,22 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/app/api/profile/route.ts` — GET returns user profile from Firestore (or email + `profileComplete: false` if no doc exists). PUT validates body with `userProfileSchema`, writes to Firestore with `merge: true`, sets `profileComplete: true`. Preserves existing `role` field. Uses `FieldValue.serverTimestamp()` for `createdAt`/`updatedAt`
 - `src/app/(user)/profile/page.tsx` — React Hook Form + Zod profile form. Fetches existing profile on mount via GET `/api/profile`. Email field is pre-filled and read-only. Two-column grid layout. On save redirects to `/dashboard` after 1.5s
 - `src/app/(user)/settings/page.tsx` — Shows email, role, links to edit profile, and sign out button. Links back to dashboard
+
+### Phase 4 Notes
+- `src/app/(user)/layout.tsx` — User shell with desktop sidebar (Dashboard, New Submission, Profile, Settings) + mobile horizontal nav. Header shows email + sign out. Wraps children with `RequireAuth` + `RequireProfile`
+- `src/app/(admin)/layout.tsx` — Admin shell with sidebar (Admin Dashboard). Header shows purple Admin badge + email + sign out. Wraps with `RequireAuth` + `RequireAdmin`
+- 12 shared UI components in `src/components/ui/`: Button (4 variants), Input, Select, Checkbox, RadioGroup, Textarea, Card + CardHeader, StatusBadge (4 statuses), Table (generic + sortable), Modal (Escape + overlay dismiss), Toast (provider + hook, auto-dismiss 4s), Spinner + LoadingState
+- All components use `forwardRef` where applicable for React Hook Form compatibility
+- Barrel export via `src/components/ui/index.ts`
+
+### Phase 5 Notes
+- `src/app/(user)/submissions/new/page.tsx` — Multi-step orchestrator. Manages step state (0/1/2), stores form data + image file in state. On submit: POST to `/api/submissions` → get submissionId → upload image to Firebase Storage → navigate to detail page. Wrapped with `RequireProfile`
+- `src/app/(user)/submissions/new/step-form.tsx` — Full application form with React Hook Form + Zod `submissionSchema`. Conditional field sections based on `productType` (spirits/wine/malt) and `source` (imported shows Country of Origin). Application Type uses `Controller` for checkbox array. Resubmission TTB ID conditional on resubmission type. Required `zodResolver` type cast (`as Resolver<SubmissionFormData>`) due to Zod v4 + @hookform/resolvers type mismatch
+- `src/app/(user)/submissions/new/step-upload.tsx` — Single image upload step using `ImageUploader` component. Validates file is selected before allowing next
+- `src/app/(user)/submissions/new/step-review.tsx` — Read-only two-column summary of all form data with product-type-specific sections. Shows image preview thumbnail. Confirm & Submit button
+- `src/components/submission/ImageUploader.tsx` — Reusable drag-and-drop + click-to-upload component. Client-side validation (JPEG/PNG/WebP/TIFF, max 10 MB). Shows preview thumbnail with filename, size, and remove button
+- **Bug fix:** Removed `RequireProfile` from `(user)/layout.tsx` to prevent redirect loop on `/profile`. `RequireProfile` now applied per-page (dashboard, submissions) instead of at layout level
+- `src/app/(user)/dashboard/page.tsx` — Placeholder page with `RequireProfile` guard (will be replaced in Phase 7)
 
 ### Key Dependency Versions
 | Package | Version |
