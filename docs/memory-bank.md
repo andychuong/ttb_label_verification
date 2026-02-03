@@ -514,6 +514,8 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 | **Phase 5: Submission Form** | ✅ Complete | Feb 2, 2026 |
 | **Phase 6: Submission API** | ✅ Complete | Feb 2, 2026 |
 | **Phase 7: User Dashboard** | ✅ Complete | Feb 2, 2026 |
+| **Phase 8: Submission Detail View** | ✅ Complete | Feb 2, 2026 |
+| **Phase 9: AI Validation Pipeline** | ✅ Complete | Feb 2, 2026 |
 
 ### Phase 0 Notes
 - Next.js 16.1.6 with App Router, TypeScript, Tailwind CSS
@@ -574,6 +576,26 @@ Admin rejects with reason → user sees rejection → clicks Duplicate & Edit �
 - `src/lib/hooks/useSubmissions.ts` — Real-time Firestore `onSnapshot` hook. Queries `submissions` where `userId == user.uid` ordered by `createdAt` desc. Returns `{ submissions, loading, error }`. Exports `SubmissionListItem` interface
 - `src/app/(user)/dashboard/page.tsx` — Full dashboard with: (1) summary stats cards (Total, Approved, Pending, Needs Revision) computed via `useMemo`, (2) status + product type filter dropdowns, (3) submissions table with sortable Date/Status columns, truncated IDs, clickable rows → `/submissions/{id}`, (4) "New Submission" button. Uses `useSubmissions` hook for real-time data. Wrapped with `RequireProfile`
 - Dashboard uses client-side filtering/sorting on the real-time snapshot data rather than API pagination — simpler for typical user volumes; cursor pagination still available via GET `/api/submissions` for programmatic use
+
+### Phase 8 Notes
+- `src/lib/hooks/useSubmission.ts` — Real-time Firestore `onSnapshot` hook for a single submission. Subscribes to main document + three subcollections (images, validationResults, reviews) in parallel. Uses `loadedCount` pattern to set loading=false only after all 4 listeners have fired. Exports `SubmissionDetail`, `SubmissionImageDoc`, `ValidationResultDoc`, `ReviewDoc` interfaces
+- `src/components/submission/FieldCheckRow.tsx` — Single validation field row showing field name, form value, label value, match status badge (MATCH/MISMATCH/NOT_FOUND/NOT_APPLICABLE with color-coded icons), and notes
+- `src/components/submission/ValidationResultsPanel.tsx` — Full validation results display: overall pass/fail badge, confidence level badge, per-field checklist using FieldCheckRow, compliance warnings with severity coloring, extracted label text in scrollable area
+- `src/app/(user)/submissions/[id]/page.tsx` — Full submission detail page with: (1) header with brand name + status badge + metadata, (2) conditional action buttons (Edit if pending+not validating, Revise & Resubmit if needs_revision, Duplicate & Edit always), (3) validation-in-progress banner with spinner, (4) needs_revision feedback banner, (5) rejection banner with reason, (6) ValidationResultsPanel, (7) label images grid with thumbnails, (8) read-only form data in two-column grid with product-type-specific sections, (9) review history timeline. Uses `useSubmission` hook for real-time data. Wrapped with `RequireProfile`
+- Task 8.4 (StatusBadge) already covered by existing `src/components/ui/StatusBadge.tsx`
+
+### Phase 9 Notes
+- `functions/src/prompt.ts` — GPT-4o system prompt with detailed TTB regulatory references (27 CFR Parts 4, 5, 7, 16). Defines matching rules per field (brand name ≥90% similarity, alcohol content exact numeric, net contents unit normalization, health warning key phrases). Exports `SYSTEM_PROMPT`, `FormDataForPrompt` interface, and `buildUserMessage()` helper
+- `functions/src/index.ts` — Three Cloud Functions:
+  - `onSubmissionCreated` — Firestore onCreate trigger on `submissions/{id}`. Sets `validationInProgress: true`, polls for images (3 attempts × 3s delay), downloads image from Cloud Storage as base64, calls GPT-4o Vision API with JSON mode, validates response structure, checks version hasn't changed (stale detection), determines outcome (auto-approve if all Tier 1 pass + overallPass, flag for admin otherwise), writes to `validationResults` subcollection
+  - `onSubmissionUpdated` — Firestore onUpdate trigger. Only re-triggers validation on resubmits (`needs_revision` → `pending`). All other updates ignored to prevent infinite loops. Stale validation handled by version check in `runValidation`
+  - `setAdminClaim` — Callable function. Requires caller to be existing admin. Sets `role: "admin"` custom claim via Auth + updates Firestore profile
+- Retry strategy: 3 attempts with exponential backoff (2s, 4s, 8s). On all failures: sets `needsAttention: true`, writes error to `validationResults` subcollection
+- Tier 1 critical checks: brandName, classTypeDesignation, alcoholContent, netContents, healthWarning, nameAndAddress — all must MATCH or NOT_APPLICABLE for auto-approval
+- Low confidence always flags for admin regardless of field results
+- Image polling: onCreate trigger polls up to 3 times (3s intervals) for images in subcollection since images are uploaded after document creation
+- Functions config: 512MiB memory, 300s timeout, OPENAI_API_KEY via `defineSecret` (Cloud Secret Manager in production, `.secret.local` for emulators)
+- Functions build: Node 18 target (CommonJS), compiles to `functions/lib/`. Both `tsc` build and Next.js root build pass cleanly
 
 ### Key Dependency Versions
 | Package | Version |

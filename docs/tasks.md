@@ -161,9 +161,9 @@
 
 ---
 
-## Phase 8: Submission Detail View (User)
+## Phase 8: Submission Detail View (User) ✅
 
-- [ ] **8.1** Create `src/app/(user)/submissions/[id]/page.tsx`:
+- [x] **8.1** Create `src/app/(user)/submissions/[id]/page.tsx`:
   - Display all form fields (read-only)
   - Display uploaded label image(s)
   - Validation Results Panel: checklist of each field with Match/Mismatch/Not Found/Pending status
@@ -172,17 +172,17 @@
   - "Edit Submission" button (if status = Pending and validationInProgress = false)
   - "Revise & Resubmit" button (if status = Needs Revision)
   - "Duplicate & Edit" button (for rejected or any submission)
-- [ ] **8.2** Create `src/components/submission/ValidationResultsPanel.tsx` — Per-field checklist component
-- [ ] **8.3** Create `src/components/submission/FieldCheckRow.tsx` — Single field match/mismatch row
-- [ ] **8.4** Create `src/components/submission/StatusBadge.tsx` — Color-coded status badges
-- [ ] **8.5** Create `src/lib/hooks/useSubmission.ts` — Firestore `onSnapshot` hook for single submission document + subcollections (real-time)
+- [x] **8.2** Create `src/components/submission/ValidationResultsPanel.tsx` — Per-field checklist component
+- [x] **8.3** Create `src/components/submission/FieldCheckRow.tsx` — Single field match/mismatch row
+- [x] **8.4** Create `src/components/submission/StatusBadge.tsx` — Color-coded status badges (reuses existing `src/components/ui/StatusBadge.tsx`)
+- [x] **8.5** Create `src/lib/hooks/useSubmission.ts` — Firestore `onSnapshot` hook for single submission document + subcollections (real-time)
 
 ---
 
-## Phase 9: AI Validation Pipeline
+## Phase 9: AI Validation Pipeline ✅
 
-- [ ] **9.1** Create `functions/src/index.ts` — Firebase Cloud Functions entry point
-- [ ] **9.2** Implement `onSubmissionCreated` Cloud Function:
+- [x] **9.1** Create `functions/src/index.ts` — Firebase Cloud Functions entry point
+- [x] **9.2** Implement `onSubmissionCreated` Cloud Function:
   - Firestore `onCreate` trigger on `submissions/{id}`
   - Set `validationInProgress: true`
   - Fetch image(s) from Cloud Storage
@@ -195,25 +195,25 @@
   - If any check fails → set `needsAttention: true`, leave status as `pending`
   - If confidence is LOW → set `needsAttention: true`
   - Set `validationInProgress: false`
-- [ ] **9.3** Implement `onSubmissionUpdated` Cloud Function:
+- [x] **9.3** Implement `onSubmissionUpdated` Cloud Function:
   - Detect version changes (user edited during validation)
   - If version changed, abort stale validation
   - If resubmit occurred, re-trigger validation
-- [ ] **9.4** Create the GPT-4o system prompt:
+- [x] **9.4** Create the GPT-4o system prompt:
   - Instructions to extract all visible text from label
   - Form data provided as JSON for comparison
   - Detailed matching rules per field (case-insensitive, numeric extraction, fuzzy thresholds)
   - Output schema specification (extractedText, fieldResults[], complianceWarnings[], overallPass, confidence)
   - TTB regulatory references (27 CFR parts 4, 5, 7, 16)
-- [ ] **9.5** Implement Tier 1 critical checks:
+- [x] **9.5** Implement Tier 1 critical checks:
   - Brand Name Match (case-insensitive, >=90% similarity)
   - Class/Type Designation Match
   - Alcohol Content Match (exact numeric)
   - Net Contents Match (unit normalization)
   - Health Warning Statement Present (key phrases check)
   - Name and Address Present
-- [ ] **9.6** Create `setAdminClaim` callable Cloud Function (sets `role: 'admin'` custom claim)
-- [ ] **9.7** Handle error scenarios:
+- [x] **9.6** Create `setAdminClaim` callable Cloud Function (sets `role: 'admin'` custom claim)
+- [x] **9.7** Handle error scenarios:
   - GPT-4o timeout/error → retry 3x → flag for admin
   - Low confidence → flag for admin with note
   - Corrupt/invalid image → reject before enqueue
